@@ -27,6 +27,7 @@ Dependencies
 ============
 
 The required dependencies to use MySQLDynMetId are:
+- mysql (mariadb, mysql)
 - cpp compiler (gcc or clang for osx)
 - cmake
 
