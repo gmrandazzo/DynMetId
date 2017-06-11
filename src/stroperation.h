@@ -58,6 +58,9 @@ template <typename T> T StringToNumber(const std::string &Text){
 /* Split a string according a delimiter and get back a list of string*/
 std::vector<std::string> strsplit(const std::string &s, char delim);
 
+/* Format various char * arguments and get back a string */
+std::string format(const char* fmt, ...);
+
 /* Trim a string */
 std::string trim(const std::string &s);
 

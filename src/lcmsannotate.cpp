@@ -40,7 +40,7 @@ int LCMSAnnotate::init(std::string dbhost, std::string user, std::string passwor
   connect = mysql_init(NULL);
 
   if(!connect){
-    std::cout << ">> mysql initialization failed <<" << std::endl;
+    std::cout << ">> MySQL initialization failed! <<" << std::endl;
     exit(1);
   }
   /*
@@ -51,7 +51,7 @@ int LCMSAnnotate::init(std::string dbhost, std::string user, std::string passwor
   connect = mysql_real_connect(connect, dbhost.c_str(), user.c_str(), password.c_str(), dbname.c_str(), 0, NULL, 0);
 
   if(!connect){
-    std::cout << ">> Connection Failed <<" << std::endl;
+    std::cout << ">> MySQL connection failed! <<" << std::endl;
     exit(1);
   }
 
@@ -169,7 +169,6 @@ struct mapres { // map results data structure...
 
 std::vector<std::string> LCMSAnnotate::find(std::string qline)
 {
-  //std::cout << "Databas size: " << (int)db[0]->collection.size() << std::endl;
   //std::cout << ">>>>> Search: <<<<<\n" << qline << std::endl;
   std::vector<std::string> q = parseqline(qline);
   std::vector<int> found; // here we put the db id!!
@@ -195,7 +194,7 @@ std::vector<std::string> LCMSAnnotate::find(std::string qline)
   double tg = 0.f;
 
   /* select the headers ID
-   * N.B.: these name must be fixed in mysql!
+   * N.B.: these name must be fixed in mysql database!
    */
   int idName = getdbid("name");
   int idMS = getdbid("ms");
@@ -246,12 +245,11 @@ std::vector<std::string> LCMSAnnotate::find(std::string qline)
       double mserror = DaltonError(ms, ppm);
 
       //std::cout << "Search for... " << FloatToString(ms, 4) << " " << ppm << " " << mserror << " "<<  add << std::endl;
-      //second column is ms
       if(found.size() == 0 && refine == false){ // search starting from MS then refine...
         for(size_t j = 0; j < dbtable.size(); j++){
-          //std::cout << stod_(db[idMS]->collection[j]->key) << " " << add << " " << stod_(db[idMS]->collection[j]->key) + add << " " << ms << std::endl;
+          //std::cout << stod_(dbtable[j][idMS]) << " " << add << " " << stod_(dbtable[j][idMS]) + add << " " << ms << std::endl;
           if(std::fabs((stod_(dbtable[j][idMS])+add) - ms) <= mserror){
-            //std::cout << stod_(db[idMS]->collection[j]->key) << " " << add << " " << stod_(db[idMS]->collection[j]->key) + add << " " << ms << " " << mserror << std::endl;
+            //std::cout << stod_(dbtable[j][idMS]) << " " << add << " " << stod_(dbtable[j][idMS]) + add << " " << ms << " " << mserror << std::endl;
             found.push_back(j);
           }
           else{
@@ -473,7 +471,7 @@ std::vector<std::string> LCMSAnnotate::find(std::string qline)
   }
 }
 
-void LCMSAnnotate::setRTLinearAligner(std::string rttunfile, std::string qline)
+void LCMSAnnotate::setRTLinearCorrection(std::string rttunfile, std::string qline)
 {
   rtslope = 1.f;
   rtintercept = 0.f;
@@ -486,11 +484,10 @@ void LCMSAnnotate::setRTLinearAligner(std::string rttunfile, std::string qline)
       std::vector<std::string> v = strsplit(line, ';');
       if(v.size() == 2){
         std::stringstream ss;
-        ss << "Name " << v[0] << ";" << qline;
+        ss << "name " << v[0] << ";" << qline;
         /* qline is of type: Name: HMDB00253; tR: -1 error: -1 init: 5 final: 95 tg: 14 flow: 0.3 vm: 0.3099 vd: 0.375 */
         std::vector<std::string> res = find(ss.str());
         if(res.size() == 1){
-          //Name: HMDB01547;MS: 346.2144094;MS ERROR: nan;tR: -1%tR error: 1.12;FORMULA: C21H30O4;STATE: EXPERIMENTAL
           std::vector<std::string> a = strsplit(res[0], ';');
           std::vector<std::string> b = strsplit(a[3], ':');
           x.push_back(stod_(v[1]));
@@ -524,6 +521,7 @@ void LCMSAnnotate::setRTLinearAligner(std::string rttunfile, std::string qline)
       n += y[i]*(x[i]-x_avg);
       d += x[i]*(x[i]-x_avg);
     }
+
     // Calculation tR corrective parameters.
     rtslope = n/d;
     rtintercept = y_avg - x_avg*rtslope;

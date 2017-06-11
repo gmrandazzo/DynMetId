@@ -59,8 +59,8 @@ public:
   std::vector<std::string> find(std::string qline);
 
   /*In case of retention time shift realign compounds according a simple linear regression. */
-  void setRTLinearAligner(std::string rttunfile, std::string qline);
-  void setRTLinearAligner(double rtslope_, double rtintercept_) { rtslope = rtslope_; rtintercept = rtintercept_; }
+  void setRTLinearCorrection(std::string rttunfile, std::string qline);
+  void setRTLinearCorrection(double rtslope_, double rtintercept_) { rtslope = rtslope_; rtintercept = rtintercept_; }
 
   /* Check if the database is empty */
   bool isEmpty(){ if(dbtable.size() == 0) return true; else return false; }
@@ -89,7 +89,7 @@ private:
   /*reduce the floating point precision to a defined "precision" */
   double pround(double x, int precision);
   /* private data*/
-  std::vector<std::vector<std::string>> dbtable; // database
+  std::vector<std::vector<std::string>> dbtable; // database stored as string matrix
   std::vector<std::string> header;
   double rtslope, rtintercept;
   size_t nrow, ncol;

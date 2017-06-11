@@ -45,27 +45,6 @@ struct FEATURE{
   std::string origname;
 };
 
-//missing string printf
-//this is safe and convenient but not exactly efficient
-inline std::string format(const char* fmt, ...){
-    int size = 512;
-    char* buffer = 0;
-    buffer = new char[size];
-    va_list vl;
-    va_start(vl, fmt);
-    int nsize = vsnprintf(buffer, size, fmt, vl);
-    if(size<=nsize){ //fail delete buffer and try again
-        delete[] buffer;
-        buffer = 0;
-        buffer = new char[nsize+1]; //+1 for /0
-        nsize = vsnprintf(buffer, size, fmt, vl);
-    }
-    std::string ret(buffer);
-    va_end(vl);
-    delete[] buffer;
-    return ret;
-}
-
 void PrintRes(std::string adductname, std::vector<std::string> r)
 {
   //std::cout << "___________FOUND___________ " << std::endl;
@@ -74,6 +53,7 @@ void PrintRes(std::string adductname, std::vector<std::string> r)
   //std::cout << "___________________________ " << std::endl;
 }
 
+/* convert the identification result string into a json object */
 std::string Annotation2JSON(std::string adductname, std::string str){
   std::string res;
   std::vector<std::string> v = strsplit(str, ';');
@@ -102,24 +82,34 @@ std::string Annotation2JSON(std::string adductname, std::string str){
 
 int main(int argc, char **argv)
 {
-  if(argc >= 16){
-    /*Initialize the database*/
-
+  if(argc >= 17){
+    //Init LCMSAnnotation
     LCMSAnnotate *lcmsann = new LCMSAnnotate;
-    lcmsann->init(argv[1], argv[2], argv[3], argv[4], argv[5]);
 
-    if(argc == 17){
-      //lcmsann->setRTLinearAligner(f_trcorr, qline);
-      //db->setRTLinearAligner(std::stof(argv[12]), std::stof(argv[13]));
-    }
-
+    //Variable definitions
     std::vector<ADDUCT> adductlst;
     std::vector<FEATURE> featlst;
     std::string inpstr;
     std::vector<std::string> r;
     std::string line;
 
-    std::ifstream f_featlst(argv[6]);
+    std::string mass_parameters;
+    mass_parameters = format("%s", argv[6]);
+
+    std::string chromatographic_parameters;
+    chromatographic_parameters = format("emperror: %s%% prederror: %s%%  init: %s final: %s tg: %s flow: %s vm: %s vd: %s", argv[9], argv[10], argv[11], argv[12], argv[13], argv[14], argv[15], argv[16]);
+
+    //MySQL parameters needed to init the database.
+    lcmsann->init(argv[1], argv[2], argv[3], argv[4], argv[5]);
+
+    if(argc == 18){
+      // chromatographic_parameters needed!
+      // Correct retention time shift
+      lcmsann->setRTLinearCorrection(argv[17], chromatographic_parameters);
+    }
+
+    // Metabolomics parameters are treated here...
+    std::ifstream f_featlst(argv[7]);
     if(f_featlst.is_open()){
       while(getline(f_featlst, line)){
         std::vector<std::string> v = strsplit(line, '_'); // Progenesis support
@@ -140,7 +130,7 @@ int main(int argc, char **argv)
       }
       f_featlst.close();
     }
-    else std::cout << "Unable to open file m/z tr list" << std::endl;
+    else std::cout << ">> Unable to open file m/z tr list <<" << std::endl;
 
     std::ifstream faddlst(argv[8]);
     if(faddlst.is_open()){
@@ -153,15 +143,21 @@ int main(int argc, char **argv)
       }
       faddlst.close();
     }
-    else std::cout << "Unable to open adduct list" << std::endl;
+    else std::cout << ">> Unable to open adduct list <<" << std::endl;
 
     // Now for each feature search each adduct by running the standard lcmsannotate query.
     std::cout << "[" << std::endl;
     for(size_t j = 0; j < featlst.size(); j++){
       std::vector<std::string> jsonlst;
       for(size_t i = 0; i < adductlst.size(); i++){
-        //inpstr = "mass: 347.2219 error: 25ppm add: 1.0079; tr: 9.05 error: 5% init: 5 final: 95 tg: 14 flow: 0.3 vm: 0.3099 vd: 0.375";
-        inpstr = format("ms: %s error: %sppm add: %f; tr: %s emperror: %s%% prederror: %s%%  init: %s final: %s tg: %s flow: %s vm: %s vd: %s", featlst[j].mass.c_str(), argv[7], adductlst[i].ms, featlst[j].tr.c_str(), argv[9], argv[10], argv[11], argv[12], argv[13], argv[14], argv[15], argv[16]);
+        // Example "mass: 347.2219 error: 25ppm add: 1.0079; tr: 9.05 error: 5% init: 5 final: 95 tg: 14 flow: 0.3 vm: 0.3099 vd: 0.375";
+        inpstr = format("ms: %s error: %s add: %f; tr: %s %s",
+                        featlst[j].mass.c_str(),
+                        mass_parameters.c_str(),
+                        adductlst[i].ms,
+                        featlst[j].tr.c_str(),
+                        chromatographic_parameters.c_str());
+
         //std::cout << "Searching for: " << inpstr << "\n" << std::endl;
         r = lcmsann->find(inpstr);
         if(r.size() > 0){
@@ -197,10 +193,22 @@ int main(int argc, char **argv)
     std::cout << "]" << std::endl;
   }
   else{
-    std::cout << format("\nUsage: %s <host> <username> <password> <db name> <table name>  <feature list> <mass error> <adduct mass list> <tr empirical error> <tr predicted error> <gradient start> <gradient stop> <time gradient> <flow rate> <dead volume> <dwell volume>\n", argv[0]) << std::endl;
-    std::cout << format("\nexample") << std::endl;
-    std::cout << format("%s localhost User1 0000 stddb steroids list_of_feature.txt  5 list_of_adducts.txt 2% 5 95 14 0.3 0.983 0.375\n", argv[0]) << std::endl;
-    std::cout << argv[0] << " was written by Giuseppe Marco Randazzo <gmrandazzo@gmail.com>\n" << std::endl;
+    std::cout << format("\nUsage: %s [mysql parameters] [metabolomics parameters] [mass parameters] [chromatographic parameters] [optional parameters]\n", argv[0]) << std::endl;
+    std::cout << format("       mysql parameters           : <host> <username> <password> <db name> <table name>") << std::endl;
+    std::cout << format("       mass parameters            : <ppm error>") << std::endl;
+    std::cout << format("       metabolomics parameters    : <feature list> <adduct list>    i.e: \"9.12_306.2841m/z ...\" and \"1.0072764649920167;M+H ...\" ") << std::endl;
+    std::cout << format("       chromatographic parameters : <tr empirical error> <tr predicted error> <gradient start> <gradient stop> <time gradient> <flow rate> <dead volume> <dwell volume> <txt correction shift list>") << std::endl;
+    std::cout << format("       optional parameters        : <Correction retention time shift list>") << std::endl;
+    //std::cout << format("\nUsage: %s <host> <username> <password> <db name> <table name>  <feature list> <mass error> <adduct mass list> <tr empirical error> <tr predicted error> <gradient start> <gradient stop> <time gradient> <flow rate> <dead volume> <dwell volume>\n", argv[0]) << std::endl;
+    std::cout << format("\nexample:\n") << std::endl;
+    std::cout << format("%s localhost User1 0000 stddb steroids list_of_feature.txt list_of_adducts.txt 5.0 2 4 5 95 14 0.3 0.983 0.375", argv[0]) << std::endl;
+    std::cout << format("    where:") << std::endl;
+    std::cout << format("    mysql parameters                   = localhost User1 0000 stddb steroid") << std::endl;
+    std::cout << format("    metabolomics parameters            = list_of_feature.txt list_of_adducts.txt") << std::endl;
+    std::cout << format("    mass parameters                    = 5.0") << std::endl;
+    std::cout << format("    chromatographic parameters         = 2 4 5 95 14 0.3 0.983 0.375") << std::endl;
+    std::cout << format("\n%s was written by Giuseppe Marco Randazzo <gmrandazzo@gmail.com>", argv[0]) << std::endl;
+    std::cout << format("Program distributed under LGPLv3 license\n\n", argv[0]) << std::endl;
   }
   return 0;
 }
