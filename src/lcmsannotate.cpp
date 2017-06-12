@@ -180,6 +180,7 @@ std::vector<std::string> LCMSAnnotate::find(std::string qline)
   }
   std::cout << "---------------" << std::endl;
   */
+
   // Global variables
   double ms = 0.f;
   double add = 0.f;
@@ -278,7 +279,7 @@ std::vector<std::string> LCMSAnnotate::find(std::string qline)
         std::cout << "Error in method definition!" << std::endl;
       }*/
 
-      for(size_t j = i+1; j < i+17; j++){
+      for(size_t j = i+1; j < q.size(); j++){
         if(q[j].compare("emperror") == 0){
           emp_trerr = stod_(purgestring(q[j+1], "%"));
         }
@@ -484,10 +485,14 @@ void LCMSAnnotate::setRTLinearCorrection(std::string rttunfile, std::string qlin
       std::vector<std::string> v = strsplit(line, ';');
       if(v.size() == 2){
         std::stringstream ss;
-        ss << "name " << v[0] << ";" << qline;
+        ss << "name " << v[0] << "; tr " << v[1] << " emperror: 100.0 prederror: 100.0 " << qline;
+
         /* qline is of type: Name: HMDB00253; tR: -1 error: -1 init: 5 final: 95 tg: 14 flow: 0.3 vm: 0.3099 vd: 0.375 */
         std::vector<std::string> res = find(ss.str());
+
+
         if(res.size() == 1){
+          std::cout << res[0] << std::endl;
           std::vector<std::string> a = strsplit(res[0], ';');
           std::vector<std::string> b = strsplit(a[3], ':');
           x.push_back(stod_(v[1]));

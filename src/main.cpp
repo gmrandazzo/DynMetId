@@ -228,7 +228,7 @@ int main(int argc, char **argv)
     std::cout << format("Written by: Giuseppe Marco Randazzo <gmrandazzo@gmail.com>") << std::endl;
     std::cout << format("Software distributed under GPLv3 license\n", argv[0]) << std::endl;
     std::cout << format("Usage:") << std::endl;
-    std::cout << format("       %s [mysql parameters] [metabolomics parameters] [mass parameters] [chromatographic parameters] [optional parameters]", argv[0]) << std::endl;
+    std::cout << format("       %s [mysql parameters] [metabolomics parameters] [identification parameters] [chromatographic parameters] [optional parameters]", argv[0]) << std::endl;
     std::cout << format("       %s [mysql parameters] [chromatographic parameters] [optional parameters]\n", argv[0]) << std::endl;
     std::cout << format("       mysql parameters           : <host> <username> <password> <db name> <table name>") << std::endl;
     std::cout << format("       identification parameters  : <ppm error> <tr empirical error> <tr predicted error>") << std::endl;
@@ -241,8 +241,8 @@ int main(int argc, char **argv)
     std::cout << format("    where:") << std::endl;
     std::cout << format("    mysql parameters                   = localhost User1 0000 stddb steroid") << std::endl;
     std::cout << format("    metabolomics parameters            = list_of_feature.txt list_of_adducts.txt") << std::endl;
-    std::cout << format("    mass parameters                    = 5.0") << std::endl;
-    std::cout << format("    chromatographic parameters         = 2 4 5 95 14 0.3 0.983 0.375") << std::endl;
+    std::cout << format("    identification parameters          = 5 2 4") << std::endl;
+    std::cout << format("    chromatographic parameters         = 5 95 14 0.3 0.983 0.375") << std::endl;
     std::cout << std::endl;
   }
   return 0;
