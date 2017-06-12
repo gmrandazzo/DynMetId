@@ -490,9 +490,7 @@ void LCMSAnnotate::setRTLinearCorrection(std::string rttunfile, std::string qlin
         /* qline is of type: Name: HMDB00253; tR: -1 error: -1 init: 5 final: 95 tg: 14 flow: 0.3 vm: 0.3099 vd: 0.375 */
         std::vector<std::string> res = find(ss.str());
 
-
         if(res.size() == 1){
-          std::cout << res[0] << std::endl;
           std::vector<std::string> a = strsplit(res[0], ';');
           std::vector<std::string> b = strsplit(a[3], ':');
           x.push_back(stod_(v[1]));
