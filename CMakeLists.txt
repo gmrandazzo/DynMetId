@@ -1,4 +1,4 @@
-PROJECT(MySQLDynMetId)
+PROJECT(DynMetId)
 cmake_minimum_required(VERSION 2.8)
 set(AUTHOR "Giuseppe Marco Randazzo")
 set(VERSION "1.0.0")
