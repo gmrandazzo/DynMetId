@@ -13,7 +13,7 @@ ENDIF (MYSQL_INCLUDE_DIR)
 FIND_PATH(MYSQL_INCLUDE_DIR
   NAMES "mysql.h"
   PATHS "/usr/include/mysql"
-	      "/usr/local/include/mysql"
+        "/usr/local/include/mysql"
         "/usr/mysql/include/mysql"
 )
 
@@ -22,13 +22,15 @@ FIND_LIBRARY(MYSQL_LIBRARY
   NAMES ${MYSQL_NAMES}
   PATHS "/usr/lib"
         "/lib/"
-			  "/lib64/"
-			  "/usr/lib/"
-			  "/usr/lib64/"
-			  "/usr/local/lib/"
-			  "/usr/local/lib64/"
-			  "/usr/mysql/lib/"
+        "/lib64/"
+        "/usr/lib/"
+        "/usr/lib64/"
+        "/usr/local/lib/"
+        "/usr/local/lib64/"
+        "/usr/mysql/lib/"
         "/usr/mysql/lib64/"
+        "/usr/local/mysql/lib"
+        "/usr/local/mysql/lib64"
   PATH_SUFFIXES mysql
 )
 

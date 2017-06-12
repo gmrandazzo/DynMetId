@@ -83,7 +83,7 @@ std::string Annotation2JSON(std::string adductname, std::string str){
 
 int main(int argc, char **argv)
 {
-  if(argc >= 17 && argc < 19){
+  if(argc >= 17 && argc <= 18){
     // Identify metabolites
     LCMSAnnotate *lcmsann = new LCMSAnnotate;
 
@@ -194,7 +194,7 @@ int main(int argc, char **argv)
     std::cout << "]" << std::endl;
     delete lcmsann;
   }
-  else if(argc >= 11 && argc < 13){
+  else if(argc >= 11 && argc <= 13){
     //Export the whole database in a CSV metascope file
     // Identify metabolites
     LCMSAnnotate *lcmsann = new LCMSAnnotate;
