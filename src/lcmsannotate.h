@@ -61,6 +61,8 @@ public:
   /* Export the whole database into a metascope file */
   std::vector<std::string> db2MetaScope(std::string chromparams);
 
+  //std::vector<std::string> dbChromatogram(std::string chromparams);
+
   /*In case of retention time shift realign compounds according a simple linear regression. */
   void setRTLinearCorrection(std::string rttunfile, std::string qline);
   void setRTLinearCorrection(double rtslope_, double rtintercept_) { rtslope = rtslope_; rtintercept = rtintercept_; }

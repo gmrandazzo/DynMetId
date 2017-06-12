@@ -208,7 +208,6 @@ int main(int argc, char **argv)
     //MySQL parameters to init the database.
     lcmsann->init(argv[1], argv[2], argv[3], argv[4], argv[5]);
 
-    std::cout << "Prubo" << std::endl;
     if(argc == 13){
       // chromatographic_parameters needed!
       // Correct retention time shift
