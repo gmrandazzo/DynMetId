@@ -1,4 +1,4 @@
-/* lcmsannotate.cpp (MySQLDynMetId)
+/* lcmsannotate.cpp (DynMetId)
 *
 * Copyright (C) <2017>  Giuseppe Marco Randazzo
 *
@@ -546,6 +546,70 @@ double LCMSAnnotate::rtpred(double logkw, double s,
   return (trpred - rtintercept)/rtslope;
 }
 
+std::vector<std::string> LCMSAnnotate::db2MetaScope(std::string chromparams)
+{
+  std::vector<std::string> q = parseqline(chromparams);
+  // Global variables
+  double vm = 0.f;
+  double vd = 0.f;
+  double flow = 0.f;
+  double init_B = 0.f;
+  double final_B = 0.f;
+  double tg = 0.f;
+  std::vector<std::string> r;
+
+  for(size_t i = 0; i < q.size(); i++){
+    if(q[i].compare("init") == 0){
+      init_B = stod_(q[i+1]);
+      if(init_B > 1)
+        init_B /= 100.f;
+    }
+    else if(q[i].compare("final") == 0){
+      final_B = stod_(q[i+1]);
+      if(final_B > 1)
+        final_B /= 100.f;
+    }
+    else if(q[i].compare("tg") == 0){
+      tg = stod_(q[i+1]);
+    }
+    else if(q[i].compare("flow") == 0){
+      flow = stod_(q[i+1]);
+    }
+    else if(q[i].compare("vm") == 0){
+      vm = stod_(q[i+1]);
+    }
+    else if(q[i].compare("vd") == 0){
+      vd = stod_(q[i+1]);
+    }
+    else{
+      continue;
+    }
+  }
+
+  int idName = getdbid("name");
+  int idMS = getdbid("ms");
+  int idFormula = getdbid("formula");
+  int idFlag = getdbid("flag");
+  int idLogKw = getdbid("logkw");
+  int idS = getdbid("s");
+
+  if(init_B > 0 && final_B > 0 && tg > 0 && vm > 0 && vd > 0){ // rt calculation
+    r.push_back(format("Name;Compound ID;Neutral Mass;Retention time (min);Formula;Flag"));
+    for(size_t i = 0; i < dbtable.size(); i++){
+      double logkw = stod_(dbtable[i][idLogKw]);
+      double s = stod_(dbtable[i][idS]);
+      //std::cout << logkw << " " << s << std::endl;
+      double tr_pred = rtpred(logkw, s, vm, vd, flow, init_B, final_B, tg);
+      r.push_back(format("%s;%s;%s;%.2f;%s;%s", dbtable[i][idName].c_str(), dbtable[i][idName].c_str(), dbtable[i][idMS].c_str(), tr_pred, dbtable[i][idFormula].c_str(), dbtable[i][idFlag].c_str()));
+    }
+    return r;
+  }
+  else{
+    return r;
+  }
+}
+
+// Private methods
 double LCMSAnnotate::DaltonError(double mass, double ppm)
 {
   // error(Da) = (theoretical mass) / ((1/errorPPM)*1,000,000)

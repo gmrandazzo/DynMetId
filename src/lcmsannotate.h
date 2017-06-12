@@ -1,4 +1,4 @@
-/* lcmsannotate.h (MySQLDynMetId)
+/* lcmsannotate.h (DynMetId)
 *
 * Copyright (C) <2017>  Giuseppe Marco Randazzo
 *
@@ -57,6 +57,9 @@ public:
    * find(Name Glucuronic acid);
    */
   std::vector<std::string> find(std::string qline);
+
+  /* Export the whole database into a metascope file */
+  std::vector<std::string> db2MetaScope(std::string chromparams);
 
   /*In case of retention time shift realign compounds according a simple linear regression. */
   void setRTLinearCorrection(std::string rttunfile, std::string qline);

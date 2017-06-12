@@ -1,4 +1,4 @@
-/* stroperation.cpp (MySQLDynMetId)
+/* stroperation.cpp (DynMetId)
 *
 * Copyright (C) <2017>  Giuseppe Marco Randazzo
 *
@@ -25,6 +25,7 @@
 #include <iomanip>
 #include <vector>
 #include <locale>
+#include <cstdarg>
 
 
 /* Match a character from a list and remove this from a string */

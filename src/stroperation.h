@@ -1,4 +1,4 @@
-/* stroperation.h (MySQLDynMetId)
+/* stroperation.h (DynMetId)
 *
 * Copyright (C) <2017>  Giuseppe Marco Randazzo
 *
