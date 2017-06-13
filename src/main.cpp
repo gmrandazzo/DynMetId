@@ -290,7 +290,7 @@ int main(int argc, char **argv)
     }
 
     //JSON output
-    std::cout << "[" << std::endl;
+    //std::cout << "[";
     for(size_t i = 0; i < vobj.size()-1; i++){
       std::cout << "{";
       std::cout << "key: " << i << ",";
@@ -306,7 +306,7 @@ int main(int argc, char **argv)
     std::cout << "trexp: "  << "\"" << vobj[last].trexp << "\",";
     std::cout << "trpred: " << "\"" << vobj[last].trpred << "\"";
     std::cout << "}";
-    std::cout << "]";
+    //std::cout << "]";
     delete lcmsann;
   }
   else{
