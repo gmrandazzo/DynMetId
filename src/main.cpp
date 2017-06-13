@@ -155,7 +155,7 @@ int main(int argc, char **argv)
     else std::cout << ">> Unable to open adduct list <<" << std::endl;
 
     // Now for each feature search each adduct by running the standard lcmsannotate query.
-    std::cout << "[" << std::endl;
+    std::vector<std::string> annotated_results;
     for(size_t j = 0; j < featlst.size(); j++){
       std::vector<std::string> jsonlst;
       for(size_t i = 0; i < adductlst.size(); i++){
@@ -179,27 +179,28 @@ int main(int argc, char **argv)
       }
 
       if(jsonlst.size() > 0){
-        std::cout << "{" << std::endl;
-        std::cout << "key:" << "\"" << featlst[j].origname << "\"," << std::endl;
-        std::cout << "mass:" << "\"" << featlst[j].mass << "\"," << std::endl;
-        std::cout << "tr:" << "\"" << featlst[j].tr << "\"," << std::endl;
-        std::cout << "values: [" << std::endl;
+        std::string annotation;
+        annotation += "{";
+        annotation += "\"feature\": \"" + featlst[j].origname + "\",";
+        annotation += "\"mass\": \"" + featlst[j].mass + "\",";
+        annotation += "\"tr\": \"" + featlst[j].tr + "\",";
+        annotation += "\"annotations\": [";
         for(size_t i = 0; i < jsonlst.size()-1; i++){
-          std::cout << jsonlst[i] << std::endl;
-          std::cout << "," << std::endl;
+          annotation += jsonlst[i]+",";
         }
-        std::cout << jsonlst[jsonlst.size()-1] << std::endl;
-        std::cout << "]" << std::endl;
-
-        if(j == featlst.size()-1){
-          std::cout << "}" << std::endl;
-        }
-        else{
-          std::cout << "}," << std::endl;
-        }
+        annotation += jsonlst[jsonlst.size()-1]+"]}";
+        annotated_results.push_back(annotation);
       }
     }
-    std::cout << "]" << std::endl;
+
+    if(annotated_results.size()>0){
+      std::cout << "[";
+      for(size_t i = 0; i < annotated_results.size()-1; i++){
+        std::cout << annotated_results[i]+",";
+      }
+      std::cout << annotated_results[annotated_results.size()-1];
+      std::cout << "]";
+    }
     delete lcmsann;
   }
   else if(argc >= 11 && argc <= 13){
