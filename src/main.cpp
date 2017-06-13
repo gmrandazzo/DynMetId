@@ -46,6 +46,14 @@ struct FEATURE{
   std::string origname;
 };
 
+//Data structure for validation
+struct VOBJ{
+  VOBJ(std::string name_, std::string trexp_, std::string trpred_): name(name_), trexp(trexp_), trpred(trpred_){}
+  std::string name;
+  std::string trexp;
+  std::string trpred;
+};
+
 void PrintRes(std::string adductname, std::vector<std::string> r)
 {
   //std::cout << "___________FOUND___________ " << std::endl;
@@ -196,7 +204,6 @@ int main(int argc, char **argv)
   }
   else if(argc >= 11 && argc <= 13){
     //Export the whole database in a CSV metascope file
-    // Identify metabolites
     LCMSAnnotate *lcmsann = new LCMSAnnotate;
 
     //Variable definitions
@@ -223,13 +230,93 @@ int main(int argc, char **argv)
     r.clear();
     delete lcmsann;
   }
+  else if(strcmp(argv[6], "validate") == 0 && argc >= 14){
+    //Validate the retention time prediction
+    LCMSAnnotate *lcmsann = new LCMSAnnotate;
+
+    //Variable definitions
+    std::string chromatographic_parameters;
+    chromatographic_parameters = format("init: %s final: %s tg: %s flow: %s vm: %s vd: %s", argv[8], argv[9], argv[10], argv[11], argv[12], argv[13]);
+
+    //MySQL parameters to init the database.
+    lcmsann->init(argv[1], argv[2], argv[3], argv[4], argv[5]);
+
+    if(argc == 15){
+      // chromatographic_parameters needed!
+      // Correct retention time shift
+      lcmsann->setRTLinearCorrection(argv[14], chromatographic_parameters);
+    }
+
+    std::vector<VOBJ> vobj;
+
+    std::ifstream trlst(argv[7]);
+    std::string line;
+
+    if(trlst.is_open()){
+      while(getline(trlst, line)){
+        std::vector<std::string> v = strsplit(trim(line), ';');
+        if(v.size() == 2){
+          std::stringstream ss;
+          ss << "name " << v[0] << "; tr " << v[1] << " emperror: 100.0 prederror: 100.0 " << chromatographic_parameters;
+          std::vector<std::string> res = lcmsann->find(ss.str());
+          for(size_t i = 0; i < res.size(); i++){
+            std::vector<std::string> a = strsplit(res[i], ';');
+            std::string name = trim(strsplit(a[0], ':').back());
+            if(name.compare(v[0]) == 0){
+              vobj.push_back(VOBJ(v[0], v[1], strsplit(a[3], ':')[1]));
+              break;
+            }
+            else{
+              continue;
+            }
+          }
+
+          /*if(res.size() == 1){
+            std::vector<std::string> a = strsplit(res[0], ';');
+            std::vector<std::string> b = strsplit(a[3], ':');
+            x.push_back(stod_(v[1]));
+            y.push_back(stod_(b[1]));
+          }
+          else{
+            continue;
+          }*/
+        }
+      }
+      trlst.close();
+    }
+    else{
+      std::cout << "Unable to open compound retention time list" << std::endl;
+      return 0;
+    }
+
+    //JSON output
+    std::cout << "[" << std::endl;
+    for(size_t i = 0; i < vobj.size()-1; i++){
+      std::cout << "{" << std::endl;
+      std::cout << "key: " << i << "," << std::endl;
+      std::cout << "name: "  << "\"" << vobj[i].name << "\"," << std::endl;
+      std::cout << "trexp: "  << "\"" << vobj[i].trexp << "\"," << std::endl;
+      std::cout << "trpred: " << "\"" << vobj[i].trpred << "\"" << std::endl;
+      std::cout << "}," << std::endl;
+    }
+    size_t last = vobj.size()-1;
+    std::cout << "{" << std::endl;
+    std::cout << "key: " << last << "," << std::endl;
+    std::cout << "name: "  << "\"" << vobj[last].name << "\"," << std::endl;
+    std::cout << "trexp: "  << "\"" << vobj[last].trexp << "\"," << std::endl;
+    std::cout << "trpred: " << "\"" << vobj[last].trpred << "\"" << std::endl;
+    std::cout << "}" << std::endl;
+    std::cout << "]" << std::endl;
+    delete lcmsann;
+  }
   else{
     std::cout << format("DynMetId %d.%d.%d [Dynamic Metabolite Identification tool]", dynmetid_major, dynmetid_minor, dynmetid_patch) << std::endl;
     std::cout << format("Written by: Giuseppe Marco Randazzo <gmrandazzo@gmail.com>") << std::endl;
     std::cout << format("Software distributed under GPLv3 license\n", argv[0]) << std::endl;
     std::cout << format("Usage:") << std::endl;
-    std::cout << format("       %s [mysql parameters] [metabolomics parameters] [identification parameters] [chromatographic parameters] [optional parameters]", argv[0]) << std::endl;
-    std::cout << format("       %s [mysql parameters] [chromatographic parameters] [optional parameters]\n", argv[0]) << std::endl;
+    std::cout << format("Do annotation             :       %s [mysql parameters] [metabolomics parameters] [identification parameters] [chromatographic parameters] [optional parameters]", argv[0]) << std::endl;
+    std::cout << format("Export the whole database :       %s [mysql parameters] [chromatographic parameters] [optional parameters]", argv[0]) << std::endl;
+    std::cout << format("Validate tr prediction    :       %s [mysql parameters] validate <compounds and retention time list> [chromatographic parameters] [optional parameters]", argv[0]) << std::endl;
     std::cout << format("       mysql parameters           : <host> <username> <password> <db name> <table name>") << std::endl;
     std::cout << format("       identification parameters  : <ppm error> <tr empirical error> <tr predicted error>") << std::endl;
     std::cout << format("       metabolomics parameters    : <feature list> <adduct list>    i.e: \"9.12_306.2841m/z ...\" and \"1.0072764649920167;M+H ...\" ") << std::endl;

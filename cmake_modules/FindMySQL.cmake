@@ -15,6 +15,7 @@ FIND_PATH(MYSQL_INCLUDE_DIR
   PATHS "/usr/include/mysql"
         "/usr/local/include/mysql"
         "/usr/mysql/include/mysql"
+        "/usr/local/mysql/include/"
 )
 
 SET(MYSQL_NAMES mysqlclient mysqlclient_r)
