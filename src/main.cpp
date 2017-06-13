@@ -292,21 +292,21 @@ int main(int argc, char **argv)
     //JSON output
     std::cout << "[" << std::endl;
     for(size_t i = 0; i < vobj.size()-1; i++){
-      std::cout << "{" << std::endl;
-      std::cout << "key: " << i << "," << std::endl;
-      std::cout << "name: "  << "\"" << vobj[i].name << "\"," << std::endl;
-      std::cout << "trexp: "  << "\"" << vobj[i].trexp << "\"," << std::endl;
-      std::cout << "trpred: " << "\"" << vobj[i].trpred << "\"" << std::endl;
-      std::cout << "}," << std::endl;
+      std::cout << "{";
+      std::cout << "key: " << i << ",";
+      std::cout << "name: "  << "\"" << vobj[i].name << "\",";
+      std::cout << "trexp: "  << "\"" << vobj[i].trexp << "\",";
+      std::cout << "trpred: " << "\"" << vobj[i].trpred << "\"";
+      std::cout << "},";
     }
     size_t last = vobj.size()-1;
-    std::cout << "{" << std::endl;
-    std::cout << "key: " << last << "," << std::endl;
-    std::cout << "name: "  << "\"" << vobj[last].name << "\"," << std::endl;
-    std::cout << "trexp: "  << "\"" << vobj[last].trexp << "\"," << std::endl;
-    std::cout << "trpred: " << "\"" << vobj[last].trpred << "\"" << std::endl;
-    std::cout << "}" << std::endl;
-    std::cout << "]" << std::endl;
+    std::cout << "{";
+    std::cout << "key: " << last << ",";
+    std::cout << "name: "  << "\"" << vobj[last].name << "\",";
+    std::cout << "trexp: "  << "\"" << vobj[last].trexp << "\",";
+    std::cout << "trpred: " << "\"" << vobj[last].trpred << "\"";
+    std::cout << "}";
+    std::cout << "]";
     delete lcmsann;
   }
   else{
