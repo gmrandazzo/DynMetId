@@ -66,24 +66,24 @@ void PrintRes(std::string adductname, std::vector<std::string> r)
 std::string Annotation2JSON(std::string adductname, std::string str){
   std::string res;
   std::vector<std::string> v = strsplit(str, ';');
-  res.append("{\n");
-  res.append((std::string)"adduct: " + (std::string)"\"" + adductname + (std::string)"\",\n");
+  res.append("{");
+  res.append((std::string)"adduct: " + (std::string)"\"" + adductname + (std::string)"\",");
   for(size_t i = 0; i < v.size()-1; i++){
     if(v[i].find("link") != std::string::npos){
-      res.append((std::string)"link: " +(std::string) "\"" + trim(purgestring(v[i], "link:")) + (std::string)"\",\n" );
+      res.append((std::string)"link: " +(std::string) "\"" + trim(purgestring(v[i], "link:")) + (std::string)"\"," );
     }
     else{
       std::vector<std::string> a = strsplit(v[i], ':');
-      res.append(trim(a[0]) + (std::string)": " + (std::string)"\"" + trim(a[1]) + (std::string)"\",\n");
+      res.append(trim(a[0]) + (std::string)": " + (std::string)"\"" + trim(a[1]) + (std::string)"\",");
     }
   }
 
   if(v[v.size()-1].find("link") != std::string::npos){
-    res.append("link: " + (std::string)"\"" + trim(purgestring(v[v.size()-1], (std::string)"link:")) + "\"\n" );
+    res.append("link: " + (std::string)"\"" + trim(purgestring(v[v.size()-1], (std::string)"link:")) + "\"" );
   }
   else{
     std::vector<std::string> a = strsplit(v[v.size()-1], ':');
-    res.append(trim(a[0]) + (std::string)": " + (std::string)"\"" + trim(a[1]) + (std::string)"\"\n");
+    res.append(trim(a[0]) + (std::string)": " + (std::string)"\"" + trim(a[1]) + (std::string)"\"");
   }
   res.append("}");
   return res;
@@ -167,8 +167,6 @@ int main(int argc, char **argv)
                         featlst[j].tr.c_str(),
                         chromid_parameters.c_str(),
                         chromatographic_parameters.c_str());
-
-        //std::cout << "Searching for: " << inpstr << "\n" << std::endl;
         r = lcmsann->find(inpstr);
         if(r.size() > 0){
           for(size_t k = 0; k < r.size(); k++){

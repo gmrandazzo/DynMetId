@@ -74,10 +74,13 @@ int LCMSAnnotate::init(std::string dbhost, std::string user, std::string passwor
   res_set = mysql_store_result(connect);
   //size_t numrows = mysql_num_rows(res_set);
 
-  while(((row = mysql_fetch_row(res_set)) !=NULL)){
+  while(((row = mysql_fetch_row(res_set)) != NULL)){
     dbtable.push_back(std::vector<std::string>());
     for(size_t i = 0; i < ncol; i++){
-      dbtable.back().push_back(row[i]);
+      if(row[i] != NULL) // check if is an empty record
+        dbtable.back().push_back(row[i]);
+      else
+        dbtable.back().push_back("NULL");
     }
   }
   mysql_free_result(res_set);
