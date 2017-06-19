@@ -49,7 +49,7 @@ struct FEATURE{
 // Compare features
 bool featurecmp(const FEATURE& a, const FEATURE& b)
 {
-  return a.origname < b.origname;
+  return stod_(a.tr) < stod_(b.tr);
 }
 
 //Data structure for validation
