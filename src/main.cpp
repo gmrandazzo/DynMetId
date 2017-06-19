@@ -69,30 +69,35 @@ void PrintRes(std::string adductname, std::vector<std::string> r)
 }
 
 /* convert the identification result string into a json object */
-std::string Annotation2JSON(std::string adductname, std::string str){
-  std::string res;
-  std::vector<std::string> v = strsplit(str, ';');
-  res.append("{");
-  res.append((std::string)"\"adduct\": " + (std::string)"\"" + adductname + (std::string)"\",");
+void Annotation2JSON(std::string adductname, std::string rstr, std::string& jsonobj, std::vector<std::string>& json_annotated_names){
+  std::vector<std::string> v = strsplit(rstr, ';');
+  jsonobj.append("{");
+  jsonobj.append((std::string)"\"adduct\": " + (std::string)"\"" + adductname + (std::string)"\",");
   for(size_t i = 0; i < v.size()-1; i++){
-    if(v[i].find("link") != std::string::npos){
-      res.append((std::string)"\"link\": " +(std::string) "\"" + trim(purgestring(v[i], "link:")) + (std::string)"\"," );
+
+    if(lower(v[i]).find("link") != std::string::npos){
+      jsonobj.append((std::string)"\"link\": " +(std::string) "\"" + trim(purgestring(v[i], "link:")) + (std::string)"\"," );
     }
     else{
       std::vector<std::string> a = strsplit(v[i], ':');
-      res.append((std::string)"\""+trim(a[0]) + (std::string)"\": " + (std::string)"\"" + trim(a[1]) + (std::string)"\",");
+      if(lower(a[0]).find("name") != std::string::npos){
+        json_annotated_names.push_back(trim(a[1]));
+      }
+      jsonobj.append((std::string)"\""+trim(a[0]) + (std::string)"\": " + (std::string)"\"" + trim(a[1]) + (std::string)"\",");
     }
   }
 
-  if(v[v.size()-1].find("link") != std::string::npos){
-    res.append("\"link\": " + (std::string)"\"" + trim(purgestring(v[v.size()-1], (std::string)"link:")) + "\"" );
+  if(lower(v[v.size()-1]).find("link") != std::string::npos){
+    jsonobj.append("\"link\": " + (std::string)"\"" + trim(purgestring(v[v.size()-1], (std::string)"link:")) + "\"" );
   }
   else{
     std::vector<std::string> a = strsplit(v[v.size()-1], ':');
-    res.append((std::string)"\""+trim(a[0]) + (std::string)"\": " + (std::string)"\"" + trim(a[1]) + (std::string)"\"");
+    if(lower(a[0]).find("name") != std::string::npos){
+      json_annotated_names.push_back(trim(a[1]));
+    }
+    jsonobj.append((std::string)"\""+trim(a[0]) + (std::string)"\": " + (std::string)"\"" + trim(a[1]) + (std::string)"\"");
   }
-  res.append("}");
-  return res;
+  jsonobj.append("}");
 }
 
 int main(int argc, char **argv)
@@ -167,6 +172,9 @@ int main(int argc, char **argv)
     std::vector<std::string> annotated_results;
     for(size_t j = 0; j < featlst.size(); j++){
       std::vector<std::string> jsonlst;
+      std::string annotated_names;
+      std::vector<std::string> json_annotated_names;
+
       size_t nb_level2p = 0;
       size_t nb_level2 = 0;
       size_t nb_unknown = 0;
@@ -192,7 +200,9 @@ int main(int argc, char **argv)
             else{
               nb_unknown += 1;
             }
-            jsonlst.push_back(Annotation2JSON(adductlst[i].name, r[k]));
+            std::string jsonobj;
+            Annotation2JSON(adductlst[i].name, r[k], jsonobj, json_annotated_names);
+            jsonlst.push_back(jsonobj);
           }
         }
         r.clear();
@@ -207,6 +217,11 @@ int main(int argc, char **argv)
         annotation += "\"nb_level2+\": \"" + intost(nb_level2p) + "\",";
         annotation += "\"nb_level2\": \"" + intost(nb_level2) + "\",";
         annotation += "\"nb_unknown\": \"" + intost(nb_unknown) + "\",";
+        std::string ann_names;
+        for(size_t i = 0; i < json_annotated_names.size()-1; i++)
+          ann_names.append((std::string)"\""+json_annotated_names[i]+(std::string)"\",");
+        ann_names.append((std::string)"\""+json_annotated_names[json_annotated_names.size()-1]+(std::string)"\"");
+        annotation += "\"annotated_names\": [" + ann_names + "],";
         annotation += "\"annotations\": [";
         for(size_t i = 0; i < jsonlst.size()-1; i++){
           annotation += jsonlst[i]+",";
