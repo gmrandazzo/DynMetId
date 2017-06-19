@@ -46,6 +46,12 @@ struct FEATURE{
   std::string origname;
 };
 
+// Compare features
+bool featurecmp(const FEATURE& a, const FEATURE& b)
+{
+  return a.origname < b.origname;
+}
+
 //Data structure for validation
 struct VOBJ{
   VOBJ(std::string name_, std::string trexp_, std::string trpred_): name(name_), trexp(trexp_), trpred(trpred_){}
@@ -141,6 +147,9 @@ int main(int argc, char **argv)
     }
     else std::cout << ">> Unable to open file m/z tr list <<" << std::endl;
 
+    // Sort feature list
+    std::sort(std::begin(featlst), std::end(featlst), featurecmp);
+
     std::ifstream faddlst(argv[7]);
     if(faddlst.is_open()){
       while(getline(faddlst, line)){
@@ -158,6 +167,10 @@ int main(int argc, char **argv)
     std::vector<std::string> annotated_results;
     for(size_t j = 0; j < featlst.size(); j++){
       std::vector<std::string> jsonlst;
+      size_t nb_level2p = 0;
+      size_t nb_level2 = 0;
+      size_t nb_unknown = 0;
+
       for(size_t i = 0; i < adductlst.size(); i++){
         // Example "mass: 347.2219 error: 25ppm add: 1.0079; tr: 9.05 error: 5% init: 5 final: 95 tg: 14 flow: 0.3 vm: 0.3099 vd: 0.375";
         inpstr = format("ms: %s error: %s add: %f; tr: %s %s %s",
@@ -170,6 +183,15 @@ int main(int argc, char **argv)
         r = lcmsann->find(inpstr);
         if(r.size() > 0){
           for(size_t k = 0; k < r.size(); k++){
+            if(lower(r[k]).find("experimental") != std::string::npos){
+              nb_level2p += 1;
+            }
+            else if(lower(r[k]).find("predicted") != std::string::npos){
+              nb_level2 += 1;
+            }
+            else{
+              nb_unknown += 1;
+            }
             jsonlst.push_back(Annotation2JSON(adductlst[i].name, r[k]));
           }
         }
@@ -182,6 +204,9 @@ int main(int argc, char **argv)
         annotation += "\"feature\": \"" + featlst[j].origname + "\",";
         annotation += "\"mass\": \"" + featlst[j].mass + "\",";
         annotation += "\"tr\": \"" + featlst[j].tr + "\",";
+        annotation += "\"nb_level2+\": \"" + intost(nb_level2p) + "\",";
+        annotation += "\"nb_level2\": \"" + intost(nb_level2) + "\",";
+        annotation += "\"nb_unknown\": \"" + intost(nb_unknown) + "\",";
         annotation += "\"annotations\": [";
         for(size_t i = 0; i < jsonlst.size()-1; i++){
           annotation += jsonlst[i]+",";

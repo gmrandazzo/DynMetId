@@ -70,6 +70,9 @@ bool isNumber(std::string str);
 /* Convert a string to a double number */
 double stod_(std::string str);
 
+/* Convert int number to string */
+std::string intost(int i);
+
 /* Convert a string to lower without modifing the input */
 std::string lower(std::string str);
 #endif

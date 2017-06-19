@@ -110,6 +110,14 @@ double stod_(std::string str){
   return atof(str.c_str());
 }
 
+/* Convert int number to string */
+std::string intost(int i)
+{
+  std::stringstream ss;
+  ss << i;
+  return ss.str();
+}
+
 /* Convert a string to lower without modifing the input */
 std::string lower(std::string str){
   std::string res = str;
