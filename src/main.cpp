@@ -214,7 +214,7 @@ int main(int argc, char **argv)
         annotation += "\"feature\": \"" + featlst[j].origname + "\",";
         annotation += "\"mass\": \"" + featlst[j].mass + "\",";
         annotation += "\"tr\": \"" + featlst[j].tr + "\",";
-        annotation += "\"nb_level2+\": \"" + intost(nb_level2p) + "\",";
+        annotation += "\"nb_level2p\": \"" + intost(nb_level2p) + "\",";
         annotation += "\"nb_level2\": \"" + intost(nb_level2) + "\",";
         annotation += "\"nb_unknown\": \"" + intost(nb_unknown) + "\",";
         std::string ann_names;
