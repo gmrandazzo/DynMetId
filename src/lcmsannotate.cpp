@@ -315,8 +315,6 @@ std::vector<std::string> LCMSAnnotate::find(std::string qline)
           continue;
         }
       }
-      //WARNING! Convert t0 to vm!
-      vm *= flow;
 
       //std::cout << "tr: " << tr << " empirical err: " << emp_trerr  << " predicted error: " << pred_trerr << " vm: " << vm << " vd: " << vd << " flow: " << flow << " init: " << init_B << " final: " << final_B << " tg: " << tg << std::endl;
       if(found.size() == 0 && refine == false){ // search starting from tR
