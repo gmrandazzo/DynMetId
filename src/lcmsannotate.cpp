@@ -253,7 +253,7 @@ std::vector<std::string> LCMSAnnotate::find(std::string qline)
         for(size_t j = 0; j < dbtable.size(); j++){
           //std::cout << stod_(dbtable[j][idMS]) << " " << add << " " << stod_(dbtable[j][idMS]) + add << " " << ms << std::endl;
           if(std::fabs((stod_(dbtable[j][idMS])+add) - ms) <= mserror){
-            //std::cout << stod_(dbtable[j][idMS]) << " " << add << " " << stod_(dbtable[j][idMS]) + add << " " << ms << " " << mserror << std::endl;
+            //std::cout << dbtable[j][idName] << " "<< stod_(dbtable[j][idMS]) << " " << add << " " << stod_(dbtable[j][idMS]) + add << " " << ms << " " << mserror << std::endl;
             found.push_back(j);
           }
           else{
@@ -303,7 +303,6 @@ std::vector<std::string> LCMSAnnotate::find(std::string qline)
           tg = stod_(q[j+1]);
         }
         else if(q[j].compare("flow") == 0){
-          //std::cout << q[j] << " " << q[j+1] << std::endl;
           flow = stod_(q[j+1]);
         }
         else if(q[j].compare("vm") == 0){
@@ -316,6 +315,8 @@ std::vector<std::string> LCMSAnnotate::find(std::string qline)
           continue;
         }
       }
+      //WARNING! Convert t0 to vm!
+      vm *= flow;
 
       //std::cout << "tr: " << tr << " empirical err: " << emp_trerr  << " predicted error: " << pred_trerr << " vm: " << vm << " vd: " << vd << " flow: " << flow << " init: " << init_B << " final: " << final_B << " tg: " << tg << std::endl;
       if(found.size() == 0 && refine == false){ // search starting from tR
@@ -332,7 +333,7 @@ std::vector<std::string> LCMSAnnotate::find(std::string qline)
             else{
               perr = pred_trerr;
             }
-
+            //std::cout << "Filter from tR "<< dbtable[j][idName] << " "<< dbtable[j][idFlag] << " " << perr << " " << tr_pred << " " <<  std::fabs((tr - tr_pred)/tr)*100.f << std::endl;
             if(std::fabs((tr - tr_pred)/tr)*100.f <= perr){
               found.push_back(j);
             }
@@ -361,7 +362,7 @@ std::vector<std::string> LCMSAnnotate::find(std::string qline)
             else{
               perr = pred_trerr;
             }
-
+            //std::cout << "Refine from tR "<< dbtable[found[j]][idName] << " "<< dbtable[found[j]][idFlag] << " " << perr << " " << tr_pred << " " <<  std::fabs((tr - tr_pred)/tr)*100.f << std::endl;
             if(std::fabs((tr - tr_pred)/tr)*100.f <= perr){
               j++;
             }
