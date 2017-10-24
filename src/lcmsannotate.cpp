@@ -333,8 +333,6 @@ std::vector<std::string> LCMSAnnotate::find(std::string qline)
               perr = pred_trerr;
             }
 
-            std::cout << perr << " " << std::fabs((tr - tr_pred)/tr)*100.f;
-
             if(std::fabs((tr - tr_pred)/tr)*100.f <= perr){
               found.push_back(j);
             }
@@ -363,8 +361,6 @@ std::vector<std::string> LCMSAnnotate::find(std::string qline)
             else{
               perr = pred_trerr;
             }
-
-            std::cout << perr << " " << std::fabs((tr - tr_pred)/tr)*100.f;
 
             if(std::fabs((tr - tr_pred)/tr)*100.f <= perr){
               j++;

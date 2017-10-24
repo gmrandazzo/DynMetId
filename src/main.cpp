@@ -99,7 +99,7 @@ int main(int argc, char **argv)
     std::string line;
 
     std::string mass_parameters = format("%s", argv[8]);
-    std::string chromid_parameters = format("emperror: %s prederror: %s", argv[8], argv[9], argv[10]);
+    std::string chromid_parameters = format("emperror: %s prederror: %s", argv[9], argv[10]);
 
     std::string chromatographic_parameters;
     chromatographic_parameters = format("init: %s final: %s tg: %s flow: %s vm: %s vd: %s", argv[11], argv[12], argv[13], argv[14], argv[15], argv[16]);
