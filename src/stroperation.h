@@ -1,6 +1,6 @@
 /* stroperation.h (DynMetId)
 *
-* Copyright (C) <2017>  Giuseppe Marco Randazzo
+* Copyright (C) <2017>  Giuseppe Marco Randazzo <gmrandazzo@gmail.com>
 *
 * This program is free software: you can redistribute it and/or modify
 * it under the terms of the GNU General Public License as published by
@@ -31,6 +31,10 @@
 #define upper(x) std::transform (x.begin(), x.end(), x.begin(), ::toupper)
 #define toucfirst(x) std::transform (x.begin(), x.begin()+1, x.begin(),  ::toupper); std::transform (x.begin()+1, x.end(),   x.begin()+1,::tolower)
 */
+
+/* Match a substring (search) in a string (subject) and replace with another substring (replace)*/
+void strreplace(std::string& subject, const std::string& search, const std::string& replace);
+
 /* Match a character from a list and remove this from a string */
 void removeCharsFromString(std::string &str, const char charsToRemove[]);
 

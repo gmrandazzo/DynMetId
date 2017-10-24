@@ -1,6 +1,6 @@
 /* main.cpp (DynMetId)
 *
-* Copyright (C) <2017>  Giuseppe Marco Randazzo
+* Copyright (C) <2017>  Giuseppe Marco Randazzo <gmrandazzo@gmail.com>
 *
 * This program is free software: you can redistribute it and/or modify
 * it under the terms of the GNU General Public License as published by
@@ -18,7 +18,6 @@
 
 #include <algorithm>
 #include <iostream>
-#include <iostream>
 #include <fstream>
 #include <string>
 #include <sstream>
@@ -28,23 +27,9 @@
 #include <cstdarg>
 
 #include "version.h"
+#include "parser.h"
 #include "lcmsannotate.h"
 #include "stroperation.h"
-
-// Datastructure for adducts
-struct ADDUCT{
-  ADDUCT(std::string name_, std::string ms_): name(name_), ms(atof(ms_.c_str())){}
-  std::string name;
-  double ms;
-};
-
-//Data structure for feature
-struct FEATURE{
-  FEATURE(std::string mass_, std::string tr_, std::string origname_): mass(mass_), tr(tr_), origname(origname_){}
-  std::string mass;
-  std::string tr;
-  std::string origname;
-};
 
 // Compare features
 bool featurecmp(const FEATURE& a, const FEATURE& b)
@@ -128,47 +113,16 @@ int main(int argc, char **argv)
       lcmsann->setRTLinearCorrection(argv[17], chromatographic_parameters);
     }
 
-    // Metabolomics parameters are treated here...
-    std::ifstream f_featlst(argv[6]);
-    if(f_featlst.is_open()){
-      while(getline(f_featlst, line)){
-        std::vector<std::string> v = strsplit(line, '_'); // Progenesis support
-        if(v.size() == 2){
-          removeCharsFromString(v[1], "m/zn");
-          featlst.push_back(FEATURE(v[1], v[0], line));
-        }
-        else{ //TODO: add xcms support
-          v = strsplit(line, '@'); // Mass hunter support
-          if(v.size() == 2){
-            removeCharsFromString(v[1], "m/zn");
-            featlst.push_back(FEATURE(v[0], v[1], line));
-          }
-          else{
-            continue;
-          }
-        }
-      }
-      f_featlst.close();
-    }
-    else std::cout << ">> Unable to open file m/z tr list <<" << std::endl;
+    /* Read features */
+    FeatureRead(argv[6], featlst);
 
     // Sort feature list
     std::sort(std::begin(featlst), std::end(featlst), featurecmp);
 
-    std::ifstream faddlst(argv[7]);
-    if(faddlst.is_open()){
-      while(getline(faddlst, line)){
-        std::vector<std::string> v = strsplit(trim(line), ';');
-        if(v.size() == 2)
-          adductlst.push_back(ADDUCT(v[1], v[0]));
-        else
-          continue;
-      }
-      faddlst.close();
-    }
-    else std::cout << ">> Unable to open adduct list <<" << std::endl;
+    /*Read adducts*/
+    AdductRead(argv[7], adductlst);
 
-    // Now for each feature search each adduct by running the standard lcmsannotate query.
+    /* Now for each feature search each adduct by running the standard lcmsannotate query. */
     std::vector<std::string> annotated_results;
     for(size_t j = 0; j < featlst.size(); j++){
       std::vector<std::string> jsonlst;
@@ -180,7 +134,7 @@ int main(int argc, char **argv)
       size_t nb_unknown = 0;
 
       for(size_t i = 0; i < adductlst.size(); i++){
-        // Example "mass: 347.2219 error: 25ppm add: 1.0079; tr: 9.05 error: 5% init: 5 final: 95 tg: 14 flow: 0.3 vm: 0.3099 vd: 0.375";
+        /* Query Example "mass: 347.2219 error: 25ppm add: 1.0079; tr: 9.05 error: 5% init: 5 final: 95 tg: 14 flow: 0.3 vm: 0.3099 vd: 0.375"; */
         inpstr = format("ms: %s error: %s add: %f; tr: %s %s %s",
                         featlst[j].mass.c_str(),
                         mass_parameters.c_str(),

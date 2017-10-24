@@ -1,6 +1,6 @@
 /* lcmsannotate.cpp (DynMetId)
 *
-* Copyright (C) <2017>  Giuseppe Marco Randazzo
+* Copyright (C) <2017>  Giuseppe Marco Randazzo <gmrandazzo@gmail.com>
 *
 * This program is free software: you can redistribute it and/or modify
 * it under the terms of the GNU General Public License as published by
@@ -333,6 +333,8 @@ std::vector<std::string> LCMSAnnotate::find(std::string qline)
               perr = pred_trerr;
             }
 
+            std::cout << perr << " " << std::fabs((tr - tr_pred)/tr)*100.f;
+
             if(std::fabs((tr - tr_pred)/tr)*100.f <= perr){
               found.push_back(j);
             }
@@ -361,6 +363,9 @@ std::vector<std::string> LCMSAnnotate::find(std::string qline)
             else{
               perr = pred_trerr;
             }
+
+            std::cout << perr << " " << std::fabs((tr - tr_pred)/tr)*100.f;
+
             if(std::fabs((tr - tr_pred)/tr)*100.f <= perr){
               j++;
             }

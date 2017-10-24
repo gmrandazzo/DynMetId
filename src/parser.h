@@ -1,4 +1,4 @@
-/* version.h (DynMetId)
+/* parser.h (DynMetId)
 *
 * Copyright (C) <2017>  Giuseppe Marco Randazzo <gmrandazzo@gmail.com>
 *
@@ -16,11 +16,32 @@
 * along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#ifndef VERSION_H
-#define VERSION_H
+#ifndef PARSER_H
+#define PARSER_H
 
-#define dynmetid_major 1
-#define dynmetid_minor 0
-#define dynmetid_patch 1
+#include <iostream>
+#include <algorithm>
+#include <fstream>
+#include <string>
+#include <sstream>
+#include <vector>
+
+// Datastructure for adducts
+struct ADDUCT{
+  ADDUCT(std::string name_, std::string ms_): name(name_), ms(atof(ms_.c_str())){}
+  std::string name;
+  double ms;
+};
+
+//Data structure for feature
+struct FEATURE{
+  FEATURE(std::string mass_, std::string tr_, std::string origname_): mass(mass_), tr(tr_), origname(origname_){}
+  std::string mass;
+  std::string tr;
+  std::string origname;
+};
+
+void FeatureRead(std::string finput, std::vector<FEATURE> &featlst);
+void AdductRead(std::string finput, std::vector<ADDUCT> &adductlst);
 
 #endif

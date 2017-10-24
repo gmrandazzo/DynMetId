@@ -1,4 +1,5 @@
 set(dynmetidcmd_SRC main.cpp
+                    parser.cpp
                     lcmsannotate.cpp
                     stroperation.cpp)
 

@@ -1,6 +1,6 @@
 /* stroperation.cpp (DynMetId)
 *
-* Copyright (C) <2017>  Giuseppe Marco Randazzo
+* Copyright (C) <2017>  Giuseppe Marco Randazzo <gmrandazzo@gmail.com>
 *
 * This program is free software: you can redistribute it and/or modify
 * it under the terms of the GNU General Public License as published by
@@ -26,6 +26,16 @@
 #include <vector>
 #include <locale>
 #include <cstdarg>
+
+
+/* Match a substring (search) in a string (subject) and replace with another substring (replace)*/
+void strreplace(std::string& subject, const std::string& search, const std::string& replace) {
+    size_t pos = 0;
+    while((pos = subject.find(search, pos)) != std::string::npos) {
+         subject.replace(pos, search.length(), replace);
+         pos += replace.length();
+    }
+}
 
 
 /* Match a character from a list and remove this from a string */
