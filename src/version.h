@@ -20,7 +20,7 @@
 #define VERSION_H
 
 #define dynmetid_major 1
-#define dynmetid_minor 0
-#define dynmetid_patch 1
+#define dynmetid_minor 1
+#define dynmetid_patch 0
 
 #endif
