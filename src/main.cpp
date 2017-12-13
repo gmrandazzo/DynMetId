@@ -134,11 +134,12 @@ int main(int argc, char **argv)
       size_t nb_unknown = 0;
 
       for(size_t i = 0; i < adductlst.size(); i++){
-        /* Query Example "mass: 347.2219 error: 25ppm add: 1.0079; tr: 9.05 error: 5% init: 5 final: 95 tg: 14 flow: 0.3 vm: 0.3099 vd: 0.375"; */
-        inpstr = format("ms: %s error: %s add: %f; tr: %s %s %s",
+        /* Query Example "mass: 347.2219 error: 25ppm add: 1.0079 1; tr: 9.05 error: 5% init: 5 final: 95 tg: 14 flow: 0.3 vm: 0.3099 vd: 0.375"; */
+        inpstr = format("ms: %s error: %s add: %.8f %.2f; tr: %s %s %s",
                         featlst[j].mass.c_str(),
                         mass_parameters.c_str(),
                         adductlst[i].ms,
+                        adductlst[i].mult,
                         featlst[j].tr.c_str(),
                         chromid_parameters.c_str(),
                         chromatographic_parameters.c_str());

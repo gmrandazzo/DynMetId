@@ -26,14 +26,19 @@
 #include <sstream>
 #include <vector>
 
-// Datastructure for adducts
+/* Datastructure for adducts
+ * The adduct is defined with a neutral mass function of the monoisotopic atom present in the adducts
+ * and a multiplier which is function of the number of charges and number of monoisotopic atom present in the adduct.
+ * See LCMSAnnotate::find for more explaination of the variable "mult"
+ */
 struct ADDUCT{
-  ADDUCT(std::string name_, std::string ms_): name(name_), ms(atof(ms_.c_str())){}
+  ADDUCT(std::string name_, std::string ms_, std::string mult_) : name(name_), ms(atof(ms_.c_str())), mult(atof(mult_.c_str())){}
   std::string name;
   double ms;
+  double mult;
 };
 
-//Data structure for feature
+/* Data structure for feature */
 struct FEATURE{
   FEATURE(std::string mass_, std::string tr_, std::string origname_): mass(mass_), tr(tr_), origname(origname_){}
   std::string mass;

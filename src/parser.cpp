@@ -124,8 +124,8 @@ void AdductRead(std::string finput, std::vector<ADDUCT> &adductlst){
   if(faddlst.is_open()){
     while(getline(faddlst, line)){
       std::vector<std::string> v = strsplit(trim(line), ';');
-      if(v.size() == 2)
-        adductlst.push_back(ADDUCT(v[1], v[0]));
+      if(v.size() == 3)
+        adductlst.push_back(ADDUCT(v[0], v[1], v[2]));
       else
         continue;
     }

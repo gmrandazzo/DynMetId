@@ -170,12 +170,150 @@ struct mapres { // map results data structure...
   }
 };
 
+void LCMSAnnotate::NameSearch(int idName, std::string name, std::vector<int> *found)
+{
+  for(size_t j = 0; j < dbtable.size(); j++){
+    if(dbtable[j][idName].compare(name) == 0){
+      (*found).push_back(j);
+    }
+    else{
+      continue;
+    }
+  }
+}
+
+void LCMSAnnotate::MSSearch(int idMS, double ms, double add, double mult, double mserror, bool is_neutral, std::vector<int> *found)
+{
+  if((*found).size() == 0){ //empty search
+    if(is_neutral == true){ // i.e. neutral molecule with mass 304.2038n
+      for(size_t j = 0; j < dbtable.size(); j++){
+        if(std::fabs((stod_(dbtable[j][idMS])) - ms) <= mserror){
+          (*found).push_back(j);
+        }
+        else{
+          continue;
+        }
+      }
+    }
+    else{ // i.e. charged molecule with mass 304.2038m/z
+      for(size_t j = 0; j < dbtable.size(); j++){
+        double from_neutral_to_dalton = add+stod_(dbtable[j][idMS])*mult;
+        double from_mz_to_dalton = ms*mult-add;
+        //std::cout << stod_(dbtable[j][idMS]) << " " << add << " " << stod_(dbtable[j][idMS]) + add << " " << ms << std::endl;
+        if(std::fabs(from_neutral_to_dalton - from_mz_to_dalton) <= mserror){
+          //std::cout << dbtable[j][idName] << " "<< stod_(dbtable[j][idMS]) << " " << add << " " << stod_(dbtable[j][idMS]) + add << " " << ms << " " << mserror << std::endl;
+          (*found).push_back(j);
+        }
+        else{
+          continue;
+        }
+      }
+    }
+  }
+  else{ //refine
+    if(is_neutral == true){
+      size_t j = 0;
+      while(j < (*found).size()){
+        if(std::fabs(stod_(dbtable[(*found)[j]][idMS]) - ms) <= mserror){
+          continue;
+        }
+        else{
+          (*found).erase((*found).begin()+j);
+          j = 0;
+        }
+      }
+    }
+    else{
+      size_t j = 0;
+      while(j < (*found).size()){
+        double from_neutral_to_dalton = add+stod_(dbtable[j][idMS])*mult;
+        double from_mz_to_dalton = ms*mult-add;
+        //std::cout << stod_(dbtable[j][idMS]) << " " << add << " " << stod_(dbtable[j][idMS]) + add << " " << ms << std::endl;
+        if(std::fabs(from_neutral_to_dalton - from_mz_to_dalton) <= mserror){
+          continue;
+        }
+        else{
+          (*found).erase((*found).begin()+j);
+          j = 0;
+        }
+      }
+    }
+  }
+}
+
+void LCMSAnnotate::RTSearch(int idLogKw, int idS, int idFlag,
+                          double tr, double emp_trerr, double pred_trerr, double vm, double vd,
+                          double flow, double init_B, double final_B, double tg,
+                          std::vector<int> *found)
+{
+  if((*found).size() == 0){
+    for(size_t j = 0; j < dbtable.size(); j++){
+      if(tr > -1 && emp_trerr > -1 && pred_trerr > -1){
+        double logkw = stod_(dbtable[j][idLogKw]);
+        double s = stod_(dbtable[j][idS]);
+        double tr_pred = rtpred(logkw, s, vm, vd, flow, init_B, final_B, tg);
+        //Check if is it a predicted or experimental logkw and s
+        double perr;
+        if(lower(dbtable[j][idFlag]).compare("experimental") == 0){
+          perr = emp_trerr;
+        }
+        else{
+          perr = pred_trerr;
+        }
+        //std::cout << "Filter from tR "<< dbtable[j][idName] << " "<< dbtable[j][idFlag] << " " << perr << " " << tr_pred << " " <<  std::fabs((tr - tr_pred)/tr)*100.f << std::endl;
+        if(std::fabs((tr - tr_pred)/tr)*100.f <= perr){
+          (*found).push_back(j);
+        }
+        else{
+          continue;
+        }
+      }
+      else{
+        // no retention error comparisson needed
+        continue;
+      }
+    }
+  }
+  else{ // refine
+    size_t j = 0;
+    while(j < (*found).size()){
+      if(tr > -1 && emp_trerr > -1 && pred_trerr > -1){
+        double logkw = stod_(dbtable[(*found)[j]][idLogKw]);
+        double s = stod_(dbtable[(*found)[j]][idS]);
+        double tr_pred = rtpred(logkw, s, vm, vd, flow, init_B, final_B, tg);
+        //Check if is it a predicted or experimental logkw and s
+        double perr;
+        if(lower(dbtable[(*found)[j]][idFlag]).compare("experimental") == 0){
+          perr = emp_trerr;
+        }
+        else{
+          perr = pred_trerr;
+        }
+        //std::cout << "Refine from tR "<< dbtable[found[j]][idName] << " "<< dbtable[found[j]][idFlag] << " " << perr << " " << tr_pred << " " <<  std::fabs((tr - tr_pred)/tr)*100.f << std::endl;
+        if(std::fabs((tr - tr_pred)/tr)*100.f <= perr){
+          j++;
+        }
+        else{
+          (*found).erase((*found).begin()+j);
+          j = 0;
+        }
+      }
+      else{
+        // no retention error comparisson needed
+        j++;
+      }
+    }
+  }
+}
+/*
+  Algorithm to find adducts.
+
+*/
 std::vector<std::string> LCMSAnnotate::find(std::string qline)
 {
   //std::cout << ">>>>> Search: <<<<<\n" << qline << std::endl;
   std::vector<std::string> q = parseqline(qline);
   std::vector<int> found; // here we put the db id!!
-  bool refine = false;
   /* DEBUG QUERY STRING
   std::cout << "Parsing out: " << std::endl;
   for(int i = 0; i < (int)q.size(); i++){
@@ -187,6 +325,7 @@ std::vector<std::string> LCMSAnnotate::find(std::string qline)
   // Global variables
   double ms = 0.f;
   double add = 0.f;
+  double mult = 0.f;
   double tr = 0.f;
   double pred_trerr = 0.f;
   double emp_trerr = 0.f;
@@ -210,30 +349,30 @@ std::vector<std::string> LCMSAnnotate::find(std::string qline)
 
   for(size_t i = 0; i < q.size(); i+=2){
     if(q[i].compare("name") == 0){
-      for(size_t j = 0; j < dbtable.size(); j++){
-        if(dbtable[j][idName].compare(q[i+1]) == 0){
-          found.push_back(j);
-        }
-        else{
-          continue;
-        }
-      }
-      refine = true;
+      NameSearch(idName, q[i+1], &found);
     }
     else if(q[i].compare("ms") == 0){
-      if(q[i+1].find("m/z") != std::string::npos)
+      bool is_neutral = false;
+      if(q[i+1].find("m/z") != std::string::npos){
         purgestring(q[i+1], "m/z");
-      else if(q[i+1].find("n") != std::string::npos)
+        is_neutral = false;
+      }
+      else if(q[i+1].find("n") != std::string::npos){
         purgestring(q[i+1], "n");
+        is_neutral = true;
+      }
 
       //std::cout << "MS converted: " << q[i+1] << std::endl;
       ms = stod_(q[i+1]);
       double ppm = 0.f;
       size_t sz = 0;
-      if(i+5 <= q.size())
-        sz = i+5;
+      //mass: 347.2219 error: 25ppm add: 1.0079 1;
+      sz = i+6;
+      /*if(i+6 <= q.size())
+        sz = i+6;
       else
         sz = q.size();
+      */
 
       for(size_t j = 0; j < sz; j++){
         if(q[j].compare("error") == 0){
@@ -241,39 +380,14 @@ std::vector<std::string> LCMSAnnotate::find(std::string qline)
         }
         else if(q[j].compare("add") == 0){
           add = stod_(q[j+1]);
+          mult = stod_(q[j+2]);
         }
         else
           continue;
       }
 
       double mserror = DaltonError(ms, ppm);
-
-      //std::cout << "Search for... " << FloatToString(ms, 4) << " " << ppm << " " << mserror << " "<<  add << std::endl;
-      if(found.size() == 0 && refine == false){ // search starting from MS then refine...
-        for(size_t j = 0; j < dbtable.size(); j++){
-          //std::cout << stod_(dbtable[j][idMS]) << " " << add << " " << stod_(dbtable[j][idMS]) + add << " " << ms << std::endl;
-          if(std::fabs((stod_(dbtable[j][idMS])+add) - ms) <= mserror){
-            //std::cout << dbtable[j][idName] << " "<< stod_(dbtable[j][idMS]) << " " << add << " " << stod_(dbtable[j][idMS]) + add << " " << ms << " " << mserror << std::endl;
-            found.push_back(j);
-          }
-          else{
-            continue;
-          }
-        }
-      }
-      else{ // refine search by MS
-        size_t j = 0;
-        while(j < found.size()){
-          if(std::fabs(stod_(dbtable[found[j]][idMS]) - ms) <= mserror){
-            continue;
-          }
-          else{
-            found.erase(found.begin()+j);
-            j = 0;
-          }
-        }
-      }
-      refine = true;
+      MSSearch(idMS,ms, add, mult, mserror, is_neutral, &found);
     }
     else if(q[i].compare("tr") == 0){
       tr = stod_(q[i+1]);
@@ -316,66 +430,7 @@ std::vector<std::string> LCMSAnnotate::find(std::string qline)
         }
       }
 
-      //std::cout << "tr: " << tr << " empirical err: " << emp_trerr  << " predicted error: " << pred_trerr << " vm: " << vm << " vd: " << vd << " flow: " << flow << " init: " << init_B << " final: " << final_B << " tg: " << tg << std::endl;
-      if(found.size() == 0 && refine == false){ // search starting from tR
-        for(size_t j = 0; j < dbtable.size(); j++){
-          if(tr > -1 && emp_trerr > -1 && pred_trerr > -1){
-            double logkw = stod_(dbtable[j][idLogKw]);
-            double s = stod_(dbtable[j][idS]);
-            double tr_pred = rtpred(logkw, s, vm, vd, flow, init_B, final_B, tg);
-            //Check if is it a predicted or experimental logkw and s
-            double perr;
-            if(lower(dbtable[j][idFlag]).compare("experimental") == 0){
-              perr = emp_trerr;
-            }
-            else{
-              perr = pred_trerr;
-            }
-            //std::cout << "Filter from tR "<< dbtable[j][idName] << " "<< dbtable[j][idFlag] << " " << perr << " " << tr_pred << " " <<  std::fabs((tr - tr_pred)/tr)*100.f << std::endl;
-            if(std::fabs((tr - tr_pred)/tr)*100.f <= perr){
-              found.push_back(j);
-            }
-            else{
-              continue;
-            }
-          }
-          else{
-            // no retention error comparisson needed
-            continue;
-          }
-        }
-      }
-      else{ //refine search
-        size_t j = 0;
-        while(j < found.size()){
-          if(tr > -1 && emp_trerr > -1 && pred_trerr > -1){
-            double logkw = stod_(dbtable[found[j]][idLogKw]);
-            double s = stod_(dbtable[found[j]][idS]);
-            double tr_pred = rtpred(logkw, s, vm, vd, flow, init_B, final_B, tg);
-            //Check if is it a predicted or experimental logkw and s
-            double perr;
-            if(lower(dbtable[found[j]][idFlag]).compare("experimental") == 0){
-              perr = emp_trerr;
-            }
-            else{
-              perr = pred_trerr;
-            }
-            //std::cout << "Refine from tR "<< dbtable[found[j]][idName] << " "<< dbtable[found[j]][idFlag] << " " << perr << " " << tr_pred << " " <<  std::fabs((tr - tr_pred)/tr)*100.f << std::endl;
-            if(std::fabs((tr - tr_pred)/tr)*100.f <= perr){
-              j++;
-            }
-            else{
-              found.erase(found.begin()+j);
-              j = 0;
-            }
-          }
-          else{
-            // no retention error comparisson needed
-            //j++;
-          }
-        }
-      }
-      refine = true;
+      RTSearch(idLogKw, idS, idFlag, tr, emp_trerr, pred_trerr, vm, vd, flow, init_B, final_B, tg, &found);
     }
     else{
       continue;

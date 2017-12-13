@@ -91,6 +91,12 @@ private:
   /*Calculate the mass error in dalton*/
   double DaltonError(double mass, double ppm);
   double PPMError(double mass, double theor_mass);
+  void NameSearch(int idName, std::string name, std::vector<int> *found);
+  void MSSearch(int idMS, double ms, double add, double mult, double mserror, bool is_neutral, std::vector<int> *found);
+  void RTSearch(int idLogKw, int idS, int idFlag,
+                double tr, double emp_trerr, double pred_trerr, double vm, double vd,
+                double flow, double init_B, double final_B, double tg,
+                std::vector<int> *found);
   /*reduce the floating point precision to a defined "precision" */
   double pround(double x, int precision);
   /* private data*/
