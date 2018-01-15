@@ -468,7 +468,7 @@ std::vector<std::string> LCMSAnnotate::find(std::string qline)
           //mass_calculated = stod_(dbtable[found[i]][idMS])+add;
           mass_calculated = stod_(dbtable[found[i]][idMS])*mult+add;
 
-          std::cout << ms << " " << dbtable[found[i]][idMS] << " " << add << " " << mult << " " << mass_calcuated << std::endl;
+          std::cout << ms << " " << dbtable[found[i]][idMS] << " " << add << " " << mult << " " << mass_calculated << std::endl;
           ms_error = PPMError(ms, mass_calculated);
         }
 
