@@ -387,7 +387,7 @@ std::vector<std::string> LCMSAnnotate::find(std::string qline)
       }
 
       double mserror = DaltonError(ms, ppm);
-      MSSearch(idMS,ms, add, mult, mserror, is_neutral, &found);
+      MSSearch(idMS, ms, add, mult, mserror, is_neutral, &found);
     }
     else if(q[i].compare("tr") == 0){
       tr = stod_(q[i+1]);
@@ -437,7 +437,7 @@ std::vector<std::string> LCMSAnnotate::find(std::string qline)
     }
   }
 
-  // Give output
+  // Finalize the output
   // Name;mass_identified;error_ms;tr;error_tr %;
   // rank output from the small errors in retention time and ppm
   std::vector<std::string> res;
@@ -465,8 +465,10 @@ std::vector<std::string> LCMSAnnotate::find(std::string qline)
         //std::cout << tr_pred << std::endl;
         if(ms > 0){
           // ppm error = (mass_observed - mass_calcuated) / mass_calcualted * 1e6
-          mass_calculated = stod_(dbtable[found[i]][idMS])+add;
-          //std::cout << ms << " " << v[idMS] << " " << add << " " << mass_calcuated << std::endl;
+          //mass_calculated = stod_(dbtable[found[i]][idMS])+add;
+          mass_calculated = stod_(dbtable[found[i]][idMS])*mult+add;
+
+          std::cout << ms << " " << dbtable[found[i]][idMS] << " " << add << " " << mult << " " << mass_calcuated << std::endl;
           ms_error = PPMError(ms, mass_calculated);
         }
 
