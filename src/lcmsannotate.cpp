@@ -182,6 +182,15 @@ void LCMSAnnotate::NameSearch(int idName, std::string name, std::vector<int> *fo
   }
 }
 
+/*
+ * If you have a neutral mass "ms" and you want to convert to m/z mass do this equation:
+ *
+ *    m/z = ms*mult+adduct_exact_mass
+ *
+ * If you have a "m/z mass" and you want to convert to dalton mass follow this equation:
+ *
+ *    Dalton_mass = m/z*mult-adduct_exact_mass
+ */
 void LCMSAnnotate::MSSearch(int idMS, double ms, double add, double mult, double mserror, bool is_neutral, std::vector<int> *found)
 {
   if((*found).size() == 0){ //empty search
@@ -197,7 +206,7 @@ void LCMSAnnotate::MSSearch(int idMS, double ms, double add, double mult, double
     }
     else{ // i.e. charged molecule with mass 304.2038m/z
       for(size_t j = 0; j < dbtable.size(); j++){
-        double from_neutral_to_dalton = add+stod_(dbtable[j][idMS])*mult;
+        double from_neutral_to_dalton = stod_(dbtable[j][idMS]); //add+stod_(dbtable[j][idMS])*mult;
         double from_mz_to_dalton = ms*mult-add;
         //std::cout << stod_(dbtable[j][idMS]) << " " << add << " " << stod_(dbtable[j][idMS]) + add << " " << ms << std::endl;
         if(std::fabs(from_neutral_to_dalton - from_mz_to_dalton) <= mserror){
@@ -226,7 +235,7 @@ void LCMSAnnotate::MSSearch(int idMS, double ms, double add, double mult, double
     else{
       size_t j = 0;
       while(j < (*found).size()){
-        double from_neutral_to_dalton = add+stod_(dbtable[j][idMS])*mult;
+        double from_neutral_to_dalton = stod_(dbtable[j][idMS]); //add+stod_(dbtable[j][idMS])*mult;
         double from_mz_to_dalton = ms*mult-add;
         //std::cout << stod_(dbtable[j][idMS]) << " " << add << " " << stod_(dbtable[j][idMS]) + add << " " << ms << std::endl;
         if(std::fabs(from_neutral_to_dalton - from_mz_to_dalton) <= mserror){
@@ -465,11 +474,10 @@ std::vector<std::string> LCMSAnnotate::find(std::string qline)
         //std::cout << tr_pred << std::endl;
         if(ms > 0){
           // ppm error = (mass_observed - mass_calcuated) / mass_calcualted * 1e6
-          //mass_calculated = stod_(dbtable[found[i]][idMS])+add;
           mass_calculated = stod_(dbtable[found[i]][idMS])*mult+add;
-
-          std::cout << ms << " " << dbtable[found[i]][idMS] << " " << add << " " << mult << " " << mass_calculated << std::endl;
+          //std::cout << ms << " " << dbtable[found[i]][idMS] << " " << add << " " << mult << " " << mass_calculated << std::endl;
           ms_error = PPMError(ms, mass_calculated);
+          //std::cout << ms << " " << mass_calculated << " " ms_error << std::endl;
         }
 
         if(tr > 0){
@@ -501,7 +509,7 @@ std::vector<std::string> LCMSAnnotate::find(std::string qline)
         row << "name: " << dbtable[found[i]][idName] << ";"; // name
         row << "mass: " << FloatToString(mass_calculated, 4) << ";"; // MS
 
-        mass_calculated = stod_(dbtable[found[i]][idMS])+add;
+        mass_calculated = stod_(dbtable[found[i]][idMS])*mult+add;
         ms_error = PPMError(ms, mass_calculated);
 
         row << "mass_error: " << FloatToString(ms_error, 3) << ";"; // mass error
