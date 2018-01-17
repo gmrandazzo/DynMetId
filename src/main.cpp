@@ -162,8 +162,8 @@ int main(int argc, char **argv)
         }
         r.clear();
       }
-
-      if(jsonlst.size() > 0){
+      
+      if(jsonlst.size() > 0 && json_annotated_names.size() > 0){
         std::string annotation;
         annotation += "{";
         annotation += "\"feature\": \"" + featlst[j].origname + "\",";

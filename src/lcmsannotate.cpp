@@ -34,10 +34,10 @@
 using namespace std;
 
 /* Method to import from a mysql table into a local string matrix */
-int LCMSAnnotate::init(std::string dbhost, std::string user, std::string password, std::string dbname, std::string dbtabname)
+void LCMSAnnotate::init(std::string dbhost, std::string user, std::string password, std::string dbname, std::string dbtabname)
 {
-  MYSQL *connect;
-  connect = mysql_init(NULL);
+  MYSQL *connect = NULL;
+  connect = mysql_init(connect);
 
   if(!connect){
     std::cout << ">> MySQL initialization failed! <<" << std::endl;
@@ -87,7 +87,7 @@ int LCMSAnnotate::init(std::string dbhost, std::string user, std::string passwor
 
   nrow = dbtable.size();
   mysql_close (connect);
-  return 0;
+  mysql_library_end();
 }
 
 /*Clean the matrix */
@@ -191,9 +191,9 @@ void LCMSAnnotate::NameSearch(int idName, std::string name, std::vector<int> *fo
  *
  *    Dalton_mass = m/z*mult-adduct_exact_mass
  */
-void LCMSAnnotate::MSSearch(int idMS, double ms, double add, double mult, double mserror, bool is_neutral, std::vector<int> *found)
+void LCMSAnnotate::MSSearch(int idMS, double ms, double add, double mult, double mserror, bool is_neutral, std::vector<int> *found, bool refine)
 {
-  if((*found).size() == 0){ //empty search
+  if(refine == false){ //empty search
     if(is_neutral == true){ // i.e. neutral molecule with mass 304.2038n
       for(size_t j = 0; j < dbtable.size(); j++){
         if(std::fabs((stod_(dbtable[j][idMS])) - ms) <= mserror){
@@ -206,11 +206,12 @@ void LCMSAnnotate::MSSearch(int idMS, double ms, double add, double mult, double
     }
     else{ // i.e. charged molecule with mass 304.2038m/z
       for(size_t j = 0; j < dbtable.size(); j++){
-        double from_neutral_to_dalton = stod_(dbtable[j][idMS]); //add+stod_(dbtable[j][idMS])*mult;
+        double db_dalton = stod_(dbtable[j][idMS]); 
+//add+stod_(dbtable[j][idMS])*mult;
         double from_mz_to_dalton = ms*mult-add;
         //std::cout << stod_(dbtable[j][idMS]) << " " << add << " " << stod_(dbtable[j][idMS]) + add << " " << ms << std::endl;
-        if(std::fabs(from_neutral_to_dalton - from_mz_to_dalton) <= mserror){
-          //std::cout << dbtable[j][idName] << " "<< stod_(dbtable[j][idMS]) << " " << add << " " << stod_(dbtable[j][idMS]) + add << " " << ms << " " << mserror << std::endl;
+        if(std::fabs(db_dalton - from_mz_to_dalton) <= mserror){
+          //std::cout << stod_(dbtable[j][idMS])  << " " << db_dalton  << " " << from_mz_to_dalton << " " << mserror << std::endl;
           (*found).push_back(j);
         }
         else{
@@ -219,7 +220,7 @@ void LCMSAnnotate::MSSearch(int idMS, double ms, double add, double mult, double
       }
     }
   }
-  else{ //refine
+  else{ //refine results
     if(is_neutral == true){
       size_t j = 0;
       while(j < (*found).size()){
@@ -253,9 +254,9 @@ void LCMSAnnotate::MSSearch(int idMS, double ms, double add, double mult, double
 void LCMSAnnotate::RTSearch(int idLogKw, int idS, int idFlag,
                           double tr, double emp_trerr, double pred_trerr, double vm, double vd,
                           double flow, double init_B, double final_B, double tg,
-                          std::vector<int> *found)
+                          std::vector<int> *found, bool refine)
 {
-  if((*found).size() == 0){
+  if(refine == false){
     for(size_t j = 0; j < dbtable.size(); j++){
       if(tr > -1 && emp_trerr > -1 && pred_trerr > -1){
         double logkw = stod_(dbtable[j][idLogKw]);
@@ -284,6 +285,7 @@ void LCMSAnnotate::RTSearch(int idLogKw, int idS, int idFlag,
     }
   }
   else{ // refine
+    
     size_t j = 0;
     while(j < (*found).size()){
       if(tr > -1 && emp_trerr > -1 && pred_trerr > -1){
@@ -344,9 +346,10 @@ std::vector<std::string> LCMSAnnotate::find(std::string qline)
   double init_B = 0.f;
   double final_B = 0.f;
   double tg = 0.f;
+  bool refine = false;
 
   /* select the headers ID
-   * N.B.: these name must be fixed in mysql database!
+   * N.B.: these name should be fixed in mysql database!
    */
   int idName = getdbid("name");
   int idMS = getdbid("ms");
@@ -356,11 +359,15 @@ std::vector<std::string> LCMSAnnotate::find(std::string qline)
 
   //std::cout << "ID PARAMETERS " << idName << " " << idMS << " " << idFlag << " " << idLogKw << " " << idS << std::endl;
 
-  for(size_t i = 0; i < q.size(); i+=2){
+  for(size_t i = 0; i < q.size(); i++){
+    //std::cout << q[i] << std::endl;
     if(q[i].compare("name") == 0){
+      //std::cout << "Name Search" << std::endl;
       NameSearch(idName, q[i+1], &found);
+      refine = true;
     }
     else if(q[i].compare("ms") == 0){
+      //std::cout << "MS Search" << std::endl;
       bool is_neutral = false;
       if(q[i+1].find("m/z") != std::string::npos){
         purgestring(q[i+1], "m/z");
@@ -396,14 +403,13 @@ std::vector<std::string> LCMSAnnotate::find(std::string qline)
       }
 
       double mserror = DaltonError(ms, ppm);
-      MSSearch(idMS, ms, add, mult, mserror, is_neutral, &found);
+      MSSearch(idMS, ms, add, mult, mserror, is_neutral, &found, refine);
+      refine = true;
+      //std::cout << "N. MS identified: " << found.size() << std::endl;
     }
     else if(q[i].compare("tr") == 0){
+      //std::cout << "RT Search" << std::endl;
       tr = stod_(q[i+1]);
-
-      /*if(i+1+15 > q.size()){
-        std::cout << "Error in method definition!" << std::endl;
-      }*/
 
       for(size_t j = i+1; j < q.size(); j++){
         if(q[j].compare("emperror") == 0){
@@ -438,8 +444,9 @@ std::vector<std::string> LCMSAnnotate::find(std::string qline)
           continue;
         }
       }
-
-      RTSearch(idLogKw, idS, idFlag, tr, emp_trerr, pred_trerr, vm, vd, flow, init_B, final_B, tg, &found);
+      RTSearch(idLogKw, idS, idFlag, tr, emp_trerr, pred_trerr, vm, vd, flow, init_B, final_B, tg, &found, refine);
+      //std::cout << "N. RT identified: " << found.size() << std::endl;
+      refine = true;
     }
     else{
       continue;

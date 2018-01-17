@@ -45,7 +45,7 @@ public:
   LCMSAnnotate(){ nrow = ncol = 0; rtslope = 1.; rtintercept = 0.; }
   ~LCMSAnnotate(){ for(size_t i = 0; i < dbtable.size(); i++) dbtable[i].clear(); dbtable.clear(); };
   /* init the database structure. Charge in memory the mysql table */
-  int init(std::string dbhost, std::string user, std::string password, std::string dbname, std::string dbtabname);
+  void init(std::string dbhost, std::string user, std::string password, std::string dbname, std::string dbtabname);
 
   /* find examples:
    * find(MS 233.2844 within error 5ppm at tR 10.25 within error 5%);
@@ -92,11 +92,11 @@ private:
   double DaltonError(double mass, double ppm);
   double PPMError(double mass, double theor_mass);
   void NameSearch(int idName, std::string name, std::vector<int> *found);
-  void MSSearch(int idMS, double ms, double add, double mult, double mserror, bool is_neutral, std::vector<int> *found);
+  void MSSearch(int idMS, double ms, double add, double mult, double mserror, bool is_neutral, std::vector<int> *found, bool refine);
   void RTSearch(int idLogKw, int idS, int idFlag,
                 double tr, double emp_trerr, double pred_trerr, double vm, double vd,
                 double flow, double init_B, double final_B, double tg,
-                std::vector<int> *found);
+                std::vector<int> *found, bool refine);
   /*reduce the floating point precision to a defined "precision" */
   double pround(double x, int precision);
   /* private data*/
