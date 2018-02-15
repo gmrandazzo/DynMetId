@@ -472,7 +472,7 @@ std::vector<std::string> LCMSAnnotate::find(std::string qline)
         //std::cout << tr_pred << std::endl;
         if(ms > 0){
           // ppm error = (mass_observed - mass_calcuated) / mass_calcualted * 1e6
-          mass_calculated = stod_(dbtable[found[i]][idMS])*mult+add;
+          mass_calculated = (stod_(dbtable[found[i]][idMS])+add)/mult;
           //std::cout << ms << " " << dbtable[found[i]][idMS] << " " << add << " " << mult << " " << mass_calculated << std::endl;
           ms_error = PPMError(ms, mass_calculated);
           //std::cout << ms << " " << mass_calculated << " " ms_error << std::endl;
