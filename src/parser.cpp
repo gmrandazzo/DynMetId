@@ -63,7 +63,7 @@ void FeatureRead(std::string finput, std::vector<FEATURE> &featlst){
         ftype = semicolon;
       }
       else{
-        std::cout << ">> [DynMetId ERROR] -  m/z tr list not supported. Please contact Giuseppe Marco Randazzo <gmrandazzo@gmail.com> <<" << std::endl;
+        stf::cerr << ">> [DynMetId ERROR] -  m/z tr list not supported. Please contact Giuseppe Marco Randazzo <gmrandazzo@gmail.com> <<" << std::endl;
         return;
       }
 
@@ -117,7 +117,7 @@ void FeatureRead(std::string finput, std::vector<FEATURE> &featlst){
     }
     f_featlst.close();
   }
-  else std::cout << "File not found!" << std::endl;
+  else stf::cerr << "File not found!" << std::endl;
 }
 
 void AdductRead(std::string finput, std::vector<ADDUCT> &adductlst){
@@ -133,5 +133,5 @@ void AdductRead(std::string finput, std::vector<ADDUCT> &adductlst){
     }
     faddlst.close();
   }
-  else std::cout << ">> Unable to open adduct list <<" << std::endl;
+  else stf::cerr << ">> Unable to open adduct list <<" << std::endl;
 }

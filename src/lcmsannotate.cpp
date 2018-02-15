@@ -40,7 +40,7 @@ void LCMSAnnotate::init(std::string dbhost, std::string user, std::string passwo
   connect = mysql_init(connect);
 
   if(!connect){
-    std::cout << ">> MySQL initialization failed! <<" << std::endl;
+    stf::cerr << ">> MySQL initialization failed! <<" << std::endl;
     exit(1);
   }
   /*
@@ -51,7 +51,7 @@ void LCMSAnnotate::init(std::string dbhost, std::string user, std::string passwo
   connect = mysql_real_connect(connect, dbhost.c_str(), user.c_str(), password.c_str(), dbname.c_str(), 0, NULL, 0);
 
   if(!connect){
-    std::cout << ">> MySQL connection failed! <<" << std::endl;
+    stf::cerr << ">> MySQL connection failed! <<" << std::endl;
     exit(1);
   }
 
