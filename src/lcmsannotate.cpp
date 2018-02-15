@@ -360,11 +360,11 @@ std::vector<std::string> LCMSAnnotate::find(std::string qline)
     else if(q[i].compare("ms") == 0){
       //std::cout << "MS Search" << std::endl;
       bool is_neutral = false;
-      if(q[i+1].find("m/z") != std::string::npos){
+      if(q[i+2].find("m/z") != std::string::npos){
         purgestring(q[i+1], "m/z");
         is_neutral = false;
       }
-      else if(q[i+1].find("n") != std::string::npos){
+      else if(q[i+2].find("n") != std::string::npos){
         purgestring(q[i+1], "n");
         is_neutral = true;
       }

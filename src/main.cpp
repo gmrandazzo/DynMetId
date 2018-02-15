@@ -139,8 +139,9 @@ int main(int argc, char **argv)
 
       for(size_t i = 0; i < adductlst.size(); i++){
         /* Query Example "mass: 347.2219 error: 25ppm add: 1.0079 1; tr: 9.05 error: 5% init: 5 final: 95 tg: 14 flow: 0.3 vm: 0.3099 vd: 0.375"; */
-        inpstr = format("ms: %s error: %s add: %.8f %.2f; tr: %s %s %s",
+        inpstr = format("ms: %s %s error: %s add: %.8f %.2f; tr: %s %s %s",
                         featlst[j].mass.c_str(),
+						featlst[j].origname.c_str(),
                         mass_parameters.c_str(),
                         adductlst[i].ms,
                         adductlst[i].mult,
