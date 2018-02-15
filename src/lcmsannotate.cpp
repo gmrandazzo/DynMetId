@@ -182,15 +182,6 @@ void LCMSAnnotate::NameSearch(int idName, std::string name, std::vector<int> *fo
   }
 }
 
-/*
- * If you have a neutral mass "ms" and you want to convert to m/z mass do this equation:
- *
- *    m/z = ms*mult+adduct_exact_mass
- *
- * If you have a "m/z mass" and you want to convert to dalton mass follow this equation:
- *
- *    Dalton_mass = m/z*mult-adduct_exact_mass
- */
 void LCMSAnnotate::MSSearch(int idMS, double ms, double add, double mult, double mserror, bool is_neutral, std::vector<int> *found, bool refine)
 {
   if(refine == false){ //empty search
