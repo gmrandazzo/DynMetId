@@ -504,11 +504,10 @@ std::vector<std::string> LCMSAnnotate::find(std::string qline)
         }
       }
       else{
+        mass_calculated = (stod_(dbtable[found[i]][idMS])+add)/mult;
+        ms_error = PPMError(ms, mass_calculated);
         row << "name: " << dbtable[found[i]][idName] << ";"; // name
         row << "mass: " << FloatToString(mass_calculated, 4) << ";"; // MS
-
-        mass_calculated = stod_(dbtable[found[i]][idMS])*mult+add;
-        ms_error = PPMError(ms, mass_calculated);
 
         row << "mass_error: " << FloatToString(ms_error, 3) << ";"; // mass error
 
