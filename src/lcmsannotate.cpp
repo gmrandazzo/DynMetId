@@ -40,7 +40,7 @@ void LCMSAnnotate::init(std::string dbhost, std::string user, std::string passwo
   connect = mysql_init(connect);
 
   if(!connect){
-    stf::cerr << ">> MySQL initialization failed! <<" << std::endl;
+    std::cerr << ">> MySQL initialization failed! <<" << std::endl;
     exit(1);
   }
   /*
@@ -51,7 +51,7 @@ void LCMSAnnotate::init(std::string dbhost, std::string user, std::string passwo
   connect = mysql_real_connect(connect, dbhost.c_str(), user.c_str(), password.c_str(), dbname.c_str(), 0, NULL, 0);
 
   if(!connect){
-    stf::cerr << ">> MySQL connection failed! <<" << std::endl;
+    std::cerr << ">> MySQL connection failed! <<" << std::endl;
     exit(1);
   }
 
@@ -184,18 +184,8 @@ void LCMSAnnotate::NameSearch(int idName, std::string name, std::vector<int> *fo
 
 void LCMSAnnotate::MSSearch(int idMS, double ms, double add, double mult, double mserror, bool is_neutral, std::vector<int> *found, bool refine)
 {
-  if(refine == false){ //empty search
-    if(is_neutral == true){ // i.e. neutral molecule with mass 304.2038n
-      for(size_t j = 0; j < dbtable.size(); j++){
-        if(std::fabs((stod_(dbtable[j][idMS])) - ms) <= mserror){
-          (*found).push_back(j);
-        }
-        else{
-          continue;
-        }
-      }
-    }
-    else{ // i.e. charged molecule with mass 304.2038m/z
+  if((is_neutral && add==0.0) || (!is_neutral && add!=0.0)){
+    if(refine == false){ //empty search
       for(size_t j = 0; j < dbtable.size(); j++){
         double db_dalton = stod_(dbtable[j][idMS]); 
 //add+stod_(dbtable[j][idMS])*mult;
@@ -210,34 +200,34 @@ void LCMSAnnotate::MSSearch(int idMS, double ms, double add, double mult, double
         }
       }
     }
-  }
-  else{ //refine results
-    if(is_neutral == true){
-      size_t j = 0;
-      while(j < (*found).size()){
-        if(std::fabs(stod_(dbtable[(*found)[j]][idMS]) - ms) <= mserror){
-          continue;
-        }
-        else{
-          (*found).erase((*found).begin()+j);
-          j = 0;
-        }
-      }
-    }
-    else{
-      size_t j = 0;
-      while(j < (*found).size()){
-        double from_neutral_to_dalton = stod_(dbtable[j][idMS]); //add+stod_(dbtable[j][idMS])*mult;
-        double from_mz_to_dalton = ms*mult-add;
-        //std::cout << stod_(dbtable[j][idMS]) << " " << add << " " << stod_(dbtable[j][idMS]) + add << " " << ms << std::endl;
-        if(std::fabs(from_neutral_to_dalton - from_mz_to_dalton) <= mserror){
-          continue;
-        }
-        else{
-          (*found).erase((*found).begin()+j);
-          j = 0;
-        }
-      }
+    else{ //refine results
+      if(is_neutral == true){
+	    size_t j = 0;
+	    while(j < (*found).size()){
+		  if(std::fabs(stod_(dbtable[(*found)[j]][idMS]) - ms) <= mserror){
+		    continue;
+		  }
+		  else{
+		    (*found).erase((*found).begin()+j);
+		    j = 0;
+		  }
+	    }
+	  }
+	  else{
+	    size_t j = 0;
+	    while(j < (*found).size()){
+		  double from_neutral_to_dalton = stod_(dbtable[j][idMS]); //add+stod_(dbtable[j][idMS])*mult;
+		  double from_mz_to_dalton = ms*mult-add;
+		  //std::cout << stod_(dbtable[j][idMS]) << " " << add << " " << stod_(dbtable[j][idMS]) + add << " " << ms << std::endl;
+		  if(std::fabs(from_neutral_to_dalton - from_mz_to_dalton) <= mserror){
+		    continue;
+		  }
+		  else{
+		    (*found).erase((*found).begin()+j);
+		    j = 0;
+		  }
+	    }
+	  }
     }
   }
 }

@@ -285,7 +285,7 @@ int main(int argc, char **argv)
       trlst.close();
     }
     else{
-      stf::cerr << "Unable to open compound retention time list" << std::endl;
+      std::cerr << "Unable to open compound retention time list" << std::endl;
       return 0;
     }
 
