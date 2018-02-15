@@ -87,6 +87,8 @@ void Annotation2JSON(std::string adductname, std::string rstr, std::string& json
 
 int main(int argc, char **argv)
 {
+  bool verbose_in_cerr = true;
+  if(verbose_in_cerr) std::cerr << "Running DynMetId\n";
   if(argc >= 17 && argc <= 18){
     // Identify metabolites
     LCMSAnnotate *lcmsann = new LCMSAnnotate;
@@ -115,12 +117,14 @@ int main(int argc, char **argv)
 
     /* Read features */
     FeatureRead(argv[6], featlst);
+	if(verbose_in_cerr) std::cerr << "Loaded " << featlst.size() << " features\n";
 
     // Sort feature list
     std::sort(std::begin(featlst), std::end(featlst), featurecmp);
 
     /*Read adducts*/
     AdductRead(argv[7], adductlst);
+	if(verbose_in_cerr) std::cerr << "Loaded " << adductlst.size() << " adducts\n";
 
     /* Now for each feature search each adduct by running the standard lcmsannotate query. */
     std::vector<std::string> annotated_results;
@@ -186,6 +190,7 @@ int main(int argc, char **argv)
       }
     }
 
+    if(verbose_in_cerr) std::cerr << "Found " << annotated_results.size() << " annotations\n";
     if(annotated_results.size()>0){
       std::cout << "[";
       for(size_t i = 0; i < annotated_results.size()-1; i++){
