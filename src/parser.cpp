@@ -18,11 +18,13 @@
  *  - Simple space/tab separed tr m/z format (tr mz or mz tr tr\tmz or mz\ttr)
  */
 void FeatureRead(std::string finput, std::vector<FEATURE> &featlst){
+  std::string origline;
   std::string line;
   std::ifstream f_featlst(finput);
   if(f_featlst.is_open()){
-    while(getline(f_featlst, line)){
-      line = trim(line);
+    while(getline(f_featlst, origline)){
+      origline = trim(origline);
+	  line = trim(origline);
       strreplace(line, "min", "");
       strreplace(line, "m/z", "");
       strreplace(line, "n", "");
@@ -91,7 +93,7 @@ void FeatureRead(std::string finput, std::vector<FEATURE> &featlst){
           tr = v[0];
           mass = v[1];
         }
-        featlst.push_back(FEATURE(mass, tr, line));
+        featlst.push_back(FEATURE(mass, tr, origline));
       }
       else{
         //SKIPP
