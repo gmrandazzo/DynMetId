@@ -593,9 +593,14 @@ double LCMSAnnotate::rtpred(double logkw, double s,
   double t0 = vm/flow;
   double td = vd/flow;
   double DeltaFi = final_B - init_B;
-  double b = (t0 * DeltaFi * s) / tg;
-  double k0 = pow(10, (logkw - s*(init_B)));
-  double trpred = ((t0/b) * log10(2.3*k0*b))+ t0 + td;
+  
+  double n_logkw = logkw * log(10);
+  double n_s = s * log(10);
+  double b = (t0 * DeltaFi * n_s) / tg;
+  double k0 = exp(n_logkw - n_s*init_B);
+  
+  double corrected_k0 = k0 - (td / t0);
+  double trpred = (t0 / b) * log(1 + b * corrected_k0) + t0 + td;
   /* y = ax + b where in this case rtslope
   * and rtintercept are estimated using already identified
   * compounds in a run
